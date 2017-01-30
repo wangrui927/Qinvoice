@@ -3,7 +3,7 @@
 #include <QtWidgets>
 #include <qtrpt.h>
 #include "qcustomplot.h"
-#include "SmtpClient-for-Qt/src/SmtpMime"
+#include "SmtpClientforQt/src/SmtpMime"
 #include "mailcontent.h"
 #include "invoicedb.h"
 #include <QFileInfo>
