@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<root>
+    <User>
+        <UserName>User Mail</UserName>
+        <MailAddress>user@user.com</MailAddress>
+ 
+    </User>
+    <Invoice>
+        <EnterpriseName>My Enterprise</EnterpriseName>
+        <AddressLine1>Enterprise Address line 1</AddressLine1>
+        <AddressLine2>N° Siret: XXXXXXXXXXXXXXXXX</AddressLine2>
+        <AddressLine3>Enterprise Address line 2</AddressLine3> 
+        <InvoiceLine1>R.I.B.: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</InvoiceLine1>
+        <TVANr>xxxxxxxxxx</TVANr>
+        <TelNr>xx xx xx xx xx</TelNr>
+    </Invoice>
+</root>

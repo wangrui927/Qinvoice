@@ -1,0 +1,27 @@
+Version :   1.3.3
+Date    :   15.01.2017
+Autor   :   FA
+
+Changes:
+NEU:
+    1. In class qinvoiceutil, email validator added
+    2. Improve qinvoice.pro to automatically copy /dependencies and lib/* to output folder
+    3. Qinvoice.ini file added to save gui data
+
+BUGFIX:
+    1. Backup database error fixed(multiple savings if date > 15th of each month)
+    2. Write InvoiceTitel in DB bug fixed 
+    3. cumul_report.xml bug fixed   
+-------------------------------------------------------------------------------------------------------------
+Version :   1.3.4   
+Date    :   30.01.2017
+Autor   :   FA
+
+NEU:
+    1. add xml support for personalised invoice
+Changes:
+    1.remove Qinvoice.ini support
+
+
+
+
