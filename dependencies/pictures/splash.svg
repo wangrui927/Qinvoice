@@ -27,7 +27,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -59,20 +59,20 @@
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
      inkscape:window-width="1366"
-     inkscape:window-height="705"
+     inkscape:window-height="713"
      id="namedview2987"
      showgrid="false"
      fit-margin-top="0"
      fit-margin-left="0"
      fit-margin-right="0"
      fit-margin-bottom="0"
-     inkscape:zoom="1.5219183"
-     inkscape:cx="147.01669"
-     inkscape:cy="190.73219"
+     inkscape:zoom="1.0761588"
+     inkscape:cx="351.90365"
+     inkscape:cy="169.80796"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="1"
-     inkscape:current-layer="svg2985" />
+     inkscape:current-layer="g4161" />
   <g
      id="g4161"
      transform="translate(3.915535e-7,1.2286713e-6)">
@@ -91,31 +91,18 @@
        id="rect4005"
        style="opacity:0.46111109;fill:#00ffff;fill-opacity:1;stroke:none" />
     <text
-       transform="scale(1.0120367,0.98810647)"
+       transform="scale(1.0120367,0.98810646)"
        sodipodi:linespacing="125%"
        id="text4089"
-       y="387.89096"
+       y="410.15582"
        x="190.56242"
        style="font-style:normal;font-weight:normal;font-size:37.27185822px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
        xml:space="preserve"><tspan
          style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:52.18060303px;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI Bold'"
-         y="387.89096"
+         y="410.15582"
          x="190.56242"
          id="tspan4091"
          sodipodi:role="line">InvoiceTool</tspan></text>
-    <text
-       transform="scale(1.0120367,0.98810647)"
-       sodipodi:linespacing="125%"
-       id="text4093"
-       y="428.88998"
-       x="258.58356"
-       style="font-style:normal;font-weight:normal;font-size:37.27185822px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
-       xml:space="preserve"><tspan
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:29.81748581px;font-family:'Segoe UI';-inkscape-font-specification:'Segoe UI'"
-         y="428.88998"
-         x="258.58356"
-         id="tspan4095"
-         sodipodi:role="line">Version 1.3.3</tspan></text>
     <rect
        y="-1.2286713e-06"
        x="0"
@@ -124,13 +111,13 @@
        id="rect4005-4-0"
        style="opacity:0.78611109;fill:#000000;fill-opacity:1;stroke:none" />
     <image
-       width="31.119402"
-       height="34.066422"
+       width="63.642483"
+       height="51.721809"
        preserveAspectRatio="none"
        style="image-rendering:optimizeQuality"
        xlink:href="data:image/png;base64,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 AAAASUVORK5CYII= "
        id="image3445"
        x="310.7327"
-       y="442.20328" />
+       y="428.54788" />
   </g>
 </svg>
