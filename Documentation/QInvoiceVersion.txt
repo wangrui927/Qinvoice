@@ -21,7 +21,7 @@ NEU:
     1. add xml support for personalised invoice
 Changes:
     1.remove Qinvoice.ini support
-
+    2. Use subtotal in graph
 
 
 

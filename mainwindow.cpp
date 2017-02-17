@@ -456,7 +456,7 @@ void MainWindow:: plotRefresh(void){
         InvoiceList = getInvoiceList(AllCustomers[i-1]);
         for (int j = 1; j <= InvoiceList.size(); j++)
         {
-            TempSum += getTotal(InvoiceList[j-1]);
+            TempSum += getSubtotal(InvoiceList[j-1]);
         }
         InvoiceTotal.append(TempSum);
         TempSum = 0;

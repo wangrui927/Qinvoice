@@ -22,6 +22,9 @@ DEPENDPATH += $$SMTP_LIBRARY_LOCATION
 #win32:CONFIG(release, debug|release): LIBS += -L$$SMTP_LIBRARY_LOCATION -lSMTPEmail
 #else:win32:CONFIG(debug, debug|release): LIBS += -L$$SMTP_LIBRARY_LOCATION -lSMTPEmail
 #else:unix: LIBS += -L$$SMTP_LIBRARY_LOCATION -lSMTPEmail
+
+
+
 LIBS += -L$$SMTP_LIBRARY_LOCATION -lSMTPEmail
 
 SOURCES +=  main.cpp\
@@ -60,7 +63,7 @@ include($$PWD/QtRptProject/QtRPT/QtRPT.pri)
 !win32
 {
     linkDependenciesFolder.commands = ln -s -f $$PWD/dependencies $$OUT_PWD/$$dependencies
-    copyLibContent.commands = $(COPY_DIR) $$PWD/lib/* $$OUT_PWD
-    QMAKE_EXTRA_TARGETS += linkDependenciesFolder copyLibContent
-    POST_TARGETDEPS += linkDependenciesFolder copyLibContent
+    #copyLibContent.commands = $(COPY_DIR) $$PWD/lib/* $$OUT_PWD
+    QMAKE_EXTRA_TARGETS += linkDependenciesFolder #copyLibContent
+    POST_TARGETDEPS += linkDependenciesFolder #copyLibContent
 }
