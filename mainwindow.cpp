@@ -26,6 +26,7 @@ MainWindow::MainWindow(QString dbpath, QInvoiceSettingsStruct &XMLSettings, QWid
     this->InvoiceLine1   = XMLSettings.InvoiceLine1   ;
     this->TVANr          = XMLSettings.TVANr          ;
     this->TelNr          = XMLSettings.TelNr          ;
+    this->ToolVersion    = "1.3.5";
 
     initialiseUI();
 
@@ -35,12 +36,11 @@ MainWindow::MainWindow(QString dbpath, QInvoiceSettingsStruct &XMLSettings, QWid
     QFileInfo dbfile(dbpath);
     DBLabel->setText(dbfile.fileName());
 
-    VERSION = "1.3.4";
     workingDirectory = QApplication::applicationDirPath() + "/dependencies";
 
 
-    this->setWindowTitle(QString("V.L.K Invoice Tool - %1").arg(VERSION));
-    qDebug() << QString("Starting QInvoice version %1").arg(VERSION);
+    this->setWindowTitle(QString("V.L.K Invoice Tool - %1").arg(this->ToolVersion));
+    qDebug() << QString("Starting QInvoice version %1").arg(this->ToolVersion);
 }
 
 MainWindow::~MainWindow()
@@ -919,10 +919,11 @@ void MainWindow::on_previewInvoice_clicked()
     generateReport(previewReport,reportGroup0);
 }
 
-void MainWindow::generateReport(int type, int group)
+QString MainWindow::generateReport(int type, int group)
 {
     QString fileName;
     QtRPT *report = new QtRPT(this);
+    QString returnString = "None";
 
     if( group == reportGroup0)
     {
@@ -952,7 +953,7 @@ void MainWindow::generateReport(int type, int group)
         {
             qDebug()<<"Cannot generate Report. Courses and Constat are empty";
             statusBar()->showMessage(tr("Cannot generate Report. Courses and Constat are empty"), 4000);
-            return;
+            return "None";
         }
 
 
@@ -960,7 +961,7 @@ void MainWindow::generateReport(int type, int group)
             QString warnStr = QString("Report file %1 not found ").arg(fileName);
             QMessageBox::warning(this, "", warnStr,QMessageBox::Ok);
             statusBar()->showMessage(warnStr, 4000);
-            return;
+            return "None";
         }
 
         QObject::connect(report, SIGNAL(setValue(const int, const QString, QVariant&, const int)),
@@ -1010,12 +1011,13 @@ void MainWindow::generateReport(int type, int group)
             QString warnStr = QString("Report file %1 not found ").arg(fileName);
             QMessageBox::warning(this, "", warnStr,QMessageBox::Ok);
             statusBar()->showMessage(warnStr, 4000);
-            return;
+            return "None";
         }
 
         QObject::connect(report, SIGNAL(setValue(const int, const QString, QVariant&, const int)),
                          this, SLOT(setValue(const int, const QString, QVariant&, const int)));
         report->recordCount << SearchInvoiceModel->rowCount();
+
     }
 
     QString tmpPath;
@@ -1037,27 +1039,55 @@ void MainWindow::generateReport(int type, int group)
             QDir().mkdir(FacturePath);
         }
         report->printPDF((actuInvoicePath), true);
+        returnString = actuInvoicePath;
         //report->printExec(true,true,"Kyocera_FS-C5150DN");
         break;
     case saveReport:
-        if(QDir(FacturePath).exists())
+        if(group == reportGroup0)
         {
-            tmpPath = actuInvoiceTitle;
-            tmpPath.remove("FACTURE N° ");
-            tmpPath.replace("/","_");
-            actuInvoicePath = FacturePath+ "/" + tmpPath + ".pdf";
+            if(QDir(FacturePath).exists())
+            {
+                tmpPath = actuInvoiceTitle;
+                tmpPath.remove("FACTURE N° ");
+                tmpPath.replace("/","_");
+                actuInvoicePath = FacturePath+ "/" + tmpPath + ".pdf";
+            }
+            else
+            {
+                QDir().mkdir(FacturePath);
+            }
+            report->printPDF((actuInvoicePath), false);
+            returnString = actuInvoicePath;
         }
-        else
+        else if(group == reportGroup1)
         {
-            QDir().mkdir(FacturePath);
+            QString FileName = QString("Cumul.pdf");
+            QFile tmpfile(FileName);
+            if(tmpfile.exists())
+            {
+                if(!tmpfile.remove())
+                {
+                    QMessageBox::warning(this, tr("QInvoice"),
+                                                   tr("Cannot generate Preview. Please retry"),
+                                                   QMessageBox::Ok);
+                }
+                else
+                {
+                    QString msg = FileName + QString("  removed");
+                    statusBar()->showMessage(msg, 2000);
+                }
+            }
+
+            report->printPDF((FileName), false);
+            returnString =  FileName;
         }
-        report->printPDF((actuInvoicePath), false);
+        else {;}
         break;
     default:
 
         break;
     }
-
+    return returnString;
 }
 float MainWindow::getMontantHTCumulReport(int tva, const QString& companyname)
 {
@@ -2416,6 +2446,7 @@ void MainWindow::on_refreshSearch_clicked()
     SearchInvoiceModel->select();
 
     ui->openInvoiceview->setEnabled(SearchInvoiceModel->rowCount()>0);
+    ui->sendCumul->setEnabled(SearchInvoiceModel->rowCount()>0);
 }
 
 QVector<int> MainWindow::getInvoiceList(QString record)
@@ -2536,6 +2567,7 @@ void MainWindow::on_sendInvoice_clicked()
 
     if (error)
     {
+        QMessageBox::critical(this, "ERROR!!", tr("Mail not sent. Error during sending!"),QMessageBox::Ok);
         ApplicationShowInfos("Mail not sent. Error during sending!",4000);
     }
     else
@@ -2630,9 +2662,8 @@ int MainWindow::sendMail(void)
                            "V.L.K. Express\n").arg(CustomerName).arg(locale.toString(InvDate,"MMMM")).arg(InvDate.year()).arg(this->UserName);
     }
 
-
     MailContent MContent;
-    MContent.setMailInfos(MailText,CustomerName);
+    MContent.setMailInfos(MailText,CustomerMail);
     if(!MContent.exec())
     {
         return 1;
@@ -2945,11 +2976,151 @@ void MainWindow::on_lastInvoice_clicked(void)
     }
 }
 
-
-
-/* -------------- This should be the end lines --------------*/
-void MainWindow::on_actionDebug_triggered()
+void MainWindow::on_sendCumul_clicked()
 {
-    qDebug() <<  this->TelNr << this->TVANr;
+    int error = 1;
+    on_refreshSearch_clicked();  /* This have to be done since this is not handled by a tab change*/
 
+    if(ui->CustomerCheckBox->isChecked())
+    {
+        QMessageBox msgBox;
+        msgBox.setText("How Do You Want To Proceed ? ");
+        QPushButton *PreviewButton = msgBox.addButton(tr("Preview Only"), QMessageBox::ActionRole);
+        QPushButton *SendOnlyButton = msgBox.addButton(tr("Send Without Preview"), QMessageBox::ActionRole);
+        QPushButton *abortButton = msgBox.addButton(QMessageBox::Abort);
+        msgBox.setDefaultButton(abortButton);
+        msgBox.setIcon(QMessageBox::Question);
+        msgBox.exec();
+
+        if (msgBox.clickedButton() == PreviewButton) {
+            /* Set global parameter needed for the report*/
+            generateReport(previewReport, reportGroup1);
+        } else if (msgBox.clickedButton() == SendOnlyButton) {
+            /* Generate Report and save as temp file*/
+            QString OutFileName = generateReport(saveReport, reportGroup1);
+            try
+            {
+                error = sendMailWithParam(OutFileName);
+            }
+            catch(...)
+            {
+                error = 1;
+            }
+
+            if (error)
+            {
+                QMessageBox::critical(this, "ERROR!!", tr("Mail not sent. Error during sending!"),QMessageBox::Ok);
+                ApplicationShowInfos("Mail not sent. Error during sending!",4000);
+            }
+            else
+            {
+                ApplicationShowInfos("Mail successfully sent.",4000);
+                return;
+            }
+        }
+        else
+        {;} /* Do nothing */
+
+    }
+    else
+    {
+        QMessageBox::critical(this, "", tr("Please select a customer first."), QMessageBox::Ok);
+    }
+}
+
+
+int MainWindow::sendMailWithParam(QString AttachmentPath)
+{
+    int error = 1;
+    /* Gather informations*/
+    QString CustomerName,CustomerMail;
+
+    QSqlQuery query;
+    query.exec(QString("SELECT  Name, EmailAddress FROM Customers WHERE CompanyName='%1'").arg(ui->SCustomerCombo->currentText()));
+    while (query.next())
+    {
+        CustomerName = query.value(0).toString();
+        CustomerMail = query.value(1).toString();
+    }
+    QString myMail = this->MailAddress;
+
+    /*Get mail provider*/
+    QString mailProvider;
+    QString strPattern = ".*@([A-Za-z0-9.-]+\\.[A-Za-z]{2,4})";
+    QRegExp rxlen(strPattern);
+    int pos = rxlen.indexIn(this->MailAddress);
+    if (pos > -1) {
+        mailProvider = rxlen.cap(1);
+    }
+
+    QString smtpProvider = "";
+
+    if ((QString::compare(mailProvider, "yahoo.fr", Qt::CaseInsensitive) == 0) || (QString::compare(mailProvider, "yahoo.com", Qt::CaseInsensitive) == 0))
+        smtpProvider = "smtp.mail.yahoo.com";
+    else if(QString::compare(mailProvider, "gmail.com", Qt::CaseInsensitive) == 0)
+    {
+        smtpProvider = "smtp.gmail.com";
+    }
+    else
+    {
+        qDebug() << "ERROR: Only yahoo or gmail accounts are currently supported";
+        return 1;
+    }
+
+    SmtpClient smtp(smtpProvider, 465, SmtpClient::SslConnection);
+    smtp.setUser(myMail);
+    smtp.setPassword(UserPassword);
+
+    MimeMessage message;
+    message.setSender(new EmailAddress(myMail,this->UserName));
+    message.addRecipient(new EmailAddress(CustomerMail, CustomerName));
+    message.addBcc(new EmailAddress(this->MailAddress, this->UserName));
+    message.setSubject(QString("Factures impayées"));
+
+    MimeText text;
+    QString MailText;
+
+    MailText = QString("Bonjour %1\n"
+                       "vous trouverez ci-joint les factures cumulées V.L.K. Express.\n"
+                       "sincères salutations et bonne journée.\n"
+                       "%2\n"
+                       "V.L.K. Express\n").arg(CustomerName).arg(this->UserName);
+
+    MailContent MContent;
+    MContent.setMailInfos(MailText,CustomerMail);
+    if(!MContent.exec())
+    {
+        return 1;
+    }
+    else
+    {
+        MailText = MContent.getMailText();
+        text.setText(MailText);
+        message.addPart(&text);
+        message.addPart(new MimeAttachment(new QFile(AttachmentPath)));
+        smtp.connectToHost();
+        smtp.login();
+
+        if(smtp.sendMail(message))
+        {
+            error = 0;
+        }
+        else
+        {
+            error = 1;
+        }
+        smtp.quit();
+        return error;
+    }
+}
+
+void MainWindow::on_actionRelease_Notes_triggered()
+{
+    QString path = QApplication::applicationDirPath() + "/dependencies/ReleaseNotes.txt";
+    QDesktopServices::openUrl(QUrl(path));
+}
+
+void MainWindow::on_actionAbout_triggered()
+{
+    QMessageBox::about(this, "About", QString("VLK Express.\nQInvoice tool (%1)").arg(this->ToolVersion));
 }

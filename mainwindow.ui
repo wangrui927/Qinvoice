@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>844</width>
-    <height>476</height>
+    <height>480</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -33,7 +33,7 @@
        </font>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="CustomerTab">
        <attribute name="title">
@@ -1652,8 +1652,8 @@
                  <widget class="QPushButton" name="openInvoiceview">
                   <property name="minimumSize">
                    <size>
-                    <width>60</width>
-                    <height>60</height>
+                    <width>45</width>
+                    <height>45</height>
                    </size>
                   </property>
                   <property name="text">
@@ -1671,7 +1671,7 @@
                   </property>
                  </widget>
                 </item>
-                <item row="1" column="0">
+                <item row="2" column="0">
                  <widget class="QPushButton" name="refreshSearch">
                   <property name="enabled">
                    <bool>true</bool>
@@ -1693,6 +1693,29 @@
                    <size>
                     <width>25</width>
                     <height>25</height>
+                   </size>
+                  </property>
+                 </widget>
+                </item>
+                <item row="1" column="0">
+                 <widget class="QPushButton" name="sendCumul">
+                  <property name="minimumSize">
+                   <size>
+                    <width>45</width>
+                    <height>45</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="invoiceressources.qrc">
+                    <normaloff>:/icons/dependencies/icon/mail-icon.png</normaloff>:/icons/dependencies/icon/mail-icon.png</iconset>
+                  </property>
+                  <property name="iconSize">
+                   <size>
+                    <width>35</width>
+                    <height>35</height>
                    </size>
                   </property>
                  </widget>
@@ -1884,7 +1907,7 @@
      <x>0</x>
      <y>0</y>
      <width>844</width>
-     <height>20</height>
+     <height>22</height>
     </rect>
    </property>
    <property name="minimumSize">
@@ -1903,9 +1926,9 @@
    <widget class="QMenu" name="menuTool">
     <property name="geometry">
      <rect>
-      <x>275</x>
-      <y>112</y>
-      <width>195</width>
+      <x>345</x>
+      <y>107</y>
+      <width>174</width>
       <height>119</height>
      </rect>
     </property>
@@ -1935,7 +1958,7 @@
      <string>Help</string>
     </property>
     <addaction name="actionAbout"/>
-    <addaction name="actionDebug"/>
+    <addaction name="actionRelease_Notes"/>
    </widget>
    <addaction name="menuTool"/>
    <addaction name="menuHelp"/>
@@ -1974,6 +1997,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+D</string>
+   </property>
+  </action>
+  <action name="actionRelease_Notes">
+   <property name="text">
+    <string>Release Notes</string>
    </property>
   </action>
  </widget>

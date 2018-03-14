@@ -108,9 +108,13 @@ private slots:
 
     void on_lastInvoice_clicked();
 
-    void on_actionDebug_triggered();
-
     void on_actionArchive_triggered();
+
+    void on_sendCumul_clicked();
+
+    void on_actionRelease_Notes_triggered();
+
+    void on_actionAbout_triggered();
 
 private:
     Ui::MainWindow *ui;
@@ -192,7 +196,7 @@ private:
         coursesInvoiceID = 8
     };
 
-
+    QString ToolVersion;
     QString UserName      ;
     QString MailAddress   ;
     QString EnterpriseName;
@@ -226,11 +230,12 @@ private:
     QString getAddress1(int record);
     QString getAddress2(int record);
     QString getAddress3(int record);
-    void generateReport(int type, int group);
+    QString generateReport(int type, int group);
     void plotInit(void);
     void plotRefresh(void);
     void ApplicationShowInfos(QString text, int time_ms);
     int sendMail(void);
+    int sendMailWithParam(QString AttachmentPath);
     void loadDatabase(QString pathToFile);
     void resetALL(void);
     int getInvoiceIDfromInvoiceNbr(const QString& InvoiceNbr);

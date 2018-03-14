@@ -23,5 +23,13 @@ Changes:
     1.remove Qinvoice.ini support
     2. Use subtotal in graph
 
+______________________________________________________________________________________________________________
 
+Version :   1.3.5
+Date    :   14.03.2018
+Autor   :   FA
 
+NEU:
+   1. Send cumul_report to Client via button
+   2. Critical Message when Mail wasn t send
+   3.
