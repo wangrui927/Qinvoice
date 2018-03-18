@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
     /* Loading modules*/
     splash->showMessage(QObject::tr("Loading modules..."),topRight, Qt::white);
 
-    w.show();
+    w.showMaximized();
     splash->finish(&w);
     delete splash;
     return a.exec();

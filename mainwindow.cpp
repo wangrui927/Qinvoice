@@ -3075,14 +3075,15 @@ int MainWindow::sendMailWithParam(QString AttachmentPath)
     message.setSender(new EmailAddress(myMail,this->UserName));
     message.addRecipient(new EmailAddress(CustomerMail, CustomerName));
     message.addBcc(new EmailAddress(this->MailAddress, this->UserName));
-    message.setSubject(QString("Factures impayées"));
+    message.setSubject(QString("Relance"));
 
     MimeText text;
     QString MailText;
 
     MailText = QString("Bonjour %1\n"
-                       "vous trouverez ci-joint les factures cumulées V.L.K. Express.\n"
-                       "sincères salutations et bonne journée.\n"
+                       "Sauf erreur de ma part, le relevet de factures en piece jointe est resté impayé dans mes comptes à ce jour.\n"
+                       "Dans le cas contraire, merci de me faire parvenir vos preuves de paiements.\n"
+                       "Cordialement,\n"
                        "%2\n"
                        "V.L.K. Express\n").arg(CustomerName).arg(this->UserName);
 
