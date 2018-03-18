@@ -32,4 +32,7 @@ Autor   :   FA
 NEU:
    1. Send cumul_report to Client via button
    2. Critical Message when Mail wasn t send
-   3.
+   3. Mail Subject can now be set via gui
+
+BUGFIX:
+   1. MailContent/Subject rewrite from gui fixed.

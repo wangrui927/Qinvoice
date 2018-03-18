@@ -33,7 +33,7 @@
        </font>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="CustomerTab">
        <attribute name="title">
@@ -1928,8 +1928,8 @@
      <rect>
       <x>345</x>
       <y>107</y>
-      <width>174</width>
-      <height>119</height>
+      <width>195</width>
+      <height>129</height>
      </rect>
     </property>
     <property name="title">

@@ -2575,6 +2575,7 @@ void MainWindow::on_sendInvoice_clicked()
         ApplicationShowInfos("Mail successfully sent.",4000);
         return;
     }
+
 }
 
 void MainWindow::on_printInvoice_clicked()
@@ -2641,12 +2642,13 @@ int MainWindow::sendMail(void)
     message.setSender(new EmailAddress(myMail,this->UserName));
     message.addRecipient(new EmailAddress(CustomerMail, CustomerName));
     message.addBcc(new EmailAddress(this->MailAddress, this->UserName));
-    message.setSubject(QString("Facture V.L.K du mois de %1").arg(locale.toString(InvDate,"MMMM")));
 
     MimeText text;
-    QString MailText;
+    QString MailText, Subject;
+
     if (actuDate.month()== 4 || actuDate.month()== 8 ||  actuDate.month()== 10)
     {
+        Subject = QString("Facture V.L.K du mois d' %1").arg(locale.toString(InvDate,"MMMM"));
         MailText = QString("Bonjour %1\n"
                            "vous trouverez ci-joint la facture V.L.K. Express du mois d' %2 %3.\n"
                            "sincères salutations et bonne journée.\n"
@@ -2655,6 +2657,7 @@ int MainWindow::sendMail(void)
     }
     else
     {
+        Subject = QString("Facture V.L.K du mois de %1").arg(locale.toString(InvDate,"MMMM"));
         MailText = QString("Bonjour %1\n"
                            "vous trouverez ci-joint la facture V.L.K. Express du mois de %2 %3.\n"
                            "sincères salutations et bonne journée.\n"
@@ -2663,17 +2666,22 @@ int MainWindow::sendMail(void)
     }
 
     MailContent MContent;
-    MContent.setMailInfos(MailText,CustomerMail);
+    MContent.setMailInfos(MailText,CustomerMail, Subject);
     if(!MContent.exec())
     {
         return 1;
     }
     else
     {
+        Subject  = MContent.getSubjectContent();
+        message.setSubject(Subject);
+
         MailText = MContent.getMailText();
         text.setText(MailText);
         message.addPart(&text);
+
         message.addPart(new MimeAttachment(new QFile(actuInvoicePath)));
+
         smtp.connectToHost();
         smtp.login();
 
@@ -3075,7 +3083,7 @@ int MainWindow::sendMailWithParam(QString AttachmentPath)
     message.setSender(new EmailAddress(myMail,this->UserName));
     message.addRecipient(new EmailAddress(CustomerMail, CustomerName));
     message.addBcc(new EmailAddress(this->MailAddress, this->UserName));
-    message.setSubject(QString("Relance"));
+    QString Subject = QString("Relance");
 
     MimeText text;
     QString MailText;
@@ -3088,7 +3096,7 @@ int MainWindow::sendMailWithParam(QString AttachmentPath)
                        "V.L.K. Express\n").arg(CustomerName).arg(this->UserName);
 
     MailContent MContent;
-    MContent.setMailInfos(MailText,CustomerMail);
+    MContent.setMailInfos(MailText,CustomerMail, Subject);
     if(!MContent.exec())
     {
         return 1;
@@ -3096,10 +3104,16 @@ int MainWindow::sendMailWithParam(QString AttachmentPath)
     else
     {
         MailText = MContent.getMailText();
+        Subject  = MContent.getSubjectContent();
+
+        message.setSubject(Subject);
         text.setText(MailText);
         message.addPart(&text);
+
         message.addPart(new MimeAttachment(new QFile(AttachmentPath)));
+
         smtp.connectToHost();
+
         smtp.login();
 
         if(smtp.sendMail(message))
