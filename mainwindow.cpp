@@ -145,6 +145,11 @@ void MainWindow::initialiseUI()
     ui->CoursesTableView-> setItemDelegate(new MyDelegate(1,6));
     connect(ui->CoursesTableView->model(), SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(onInvoiceDataChanged()));
 
+    // Resize table column to width
+    for (int c = 0; c < ui->CoursesTableView->horizontalHeader()->count(); ++c)
+    {
+        ui->CoursesTableView->horizontalHeader()->setSectionResizeMode(c, QHeaderView::Stretch);
+    }
     /*
      * Constat Model
      */
@@ -166,9 +171,12 @@ void MainWindow::initialiseUI()
     ui->ConstatTableView->setAlternatingRowColors(true);
     ui->ConstatTableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->ConstatTableView-> setItemDelegate(new MyDelegate(1,4));
-
     connect(ui->ConstatTableView->model(), SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(onInvoiceDataChanged()));
-
+    // Resize table column to width
+    for (int c = 0; c < ui->ConstatTableView->horizontalHeader()->count(); ++c)
+    {
+        ui->ConstatTableView->horizontalHeader()->setSectionResizeMode(c, QHeaderView::Stretch);
+    }
     mapper->toLast();
 
     actualiseInvoiceTempInfos();
@@ -206,12 +214,20 @@ void MainWindow::initialiseUI()
     ui->CustomerTableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     connect(ui->CustomerTableView->model(), SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(onCustomerDataChanged()));
 
+    // Resize table column to width
+    for (int c = 0; c < ui->CustomerTableView->horizontalHeader()->count(); ++c)
+    {
+        ui->CustomerTableView->horizontalHeader()->setSectionResizeMode(c, QHeaderView::Stretch);
+    }
     /*
      * Search Tab
      */
     SearchInvoiceModel = new QSqlRelationalTableModel(this);
     SearchInvoiceModel->setTable("Invoices");
+
+    /*sql join customer name (from Table Customer) and CustomerID (from table Invoice)*/
     SearchInvoiceModel->setRelation(invoice_CustomerID, QSqlRelation("Customers", "CustomerID", "CompanyName"));
+
     SearchInvoiceModel->setSort(invoice_Id, Qt::AscendingOrder);
 
     if (!SearchInvoiceModel->select())
@@ -220,7 +236,6 @@ void MainWindow::initialiseUI()
     /*
      * Invoice Head
      */
-    SearchRelationModel = SearchInvoiceModel->relationModel(invoice_CustomerID);
 
     QDate today = QDate::currentDate();
     ui->StartDateEdit->setDate(today.addDays(-15));
@@ -244,10 +259,41 @@ void MainWindow::initialiseUI()
     ui->SearchInvoiceView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->SearchInvoiceView->setColumnHidden(SearchInvoiceModel->fieldIndex("InvoiceID"), true);
     ui->SearchInvoiceView->setColumnHidden(SearchInvoiceModel->fieldIndex("Notes"), true);
+    ui->SearchInvoiceView->setColumnHidden(SearchInvoiceModel->fieldIndex("SentOn"), true);
     ui->SearchInvoiceView->setItemDelegate(new SearchDelegate(SearchTab_invoiceDate, SearchTab_Satus));
 
     ui->SCustomerCombo->setModel(relationModel);
     ui->SCustomerCombo->setModelColumn(relationModel->fieldIndex("CompanyName"));
+    // Resize table column to width
+    for (int c = 0; c < ui->SearchInvoiceView->horizontalHeader()->count(); ++c)
+    {
+        ui->SearchInvoiceView->horizontalHeader()->setSectionResizeMode(c, QHeaderView::Stretch);
+    }
+
+/*
+ * RelaunchInvoiceView
+ */
+    RelaunchInvoiceModel = new QSqlRelationalTableModel(this);
+    RelaunchInvoiceModel->setTable("Invoices");
+
+    /*sql join customer name (from Table Customer) and CustomerID (from table Invoice)*/
+    RelaunchInvoiceModel->setRelation(invoice_CustomerID, QSqlRelation("Customers", "CustomerID", "CompanyName"));
+    RelaunchInvoiceModel->setSort(invoice_Id, Qt::AscendingOrder);
+    if (!RelaunchInvoiceModel->select())
+        qDebug() << RelaunchInvoiceModel->lastError();
+    ui->RelaunchInvoiceView->setModel(RelaunchInvoiceModel);
+    ui->RelaunchInvoiceView->setColumnHidden(RelaunchInvoiceModel->fieldIndex("InvoiceID"), true);
+    ui->RelaunchInvoiceView->setColumnHidden(RelaunchInvoiceModel->fieldIndex("Status"), true);
+    ui->RelaunchInvoiceView->setColumnHidden(RelaunchInvoiceModel->fieldIndex("Notes"), true);
+
+    // Resize table column to width
+    for (int c = 0; c < ui->RelaunchInvoiceView->horizontalHeader()->count(); ++c)
+    {
+        ui->RelaunchInvoiceView->horizontalHeader()->setSectionResizeMode(c, QHeaderView::Stretch);
+    }
+
+
+
     plotInit();
 }
 
@@ -604,8 +650,7 @@ void MainWindow::currentInvoiceChanged(int index)
 
     CoursesModel->select();
     ConstatModel->select();
-    refreshCoursesView();
-    refreshConstatView();
+
     actualiseAmountField(getSubtotal(id), getTotal(id));
     actualiseInvoiceTempInfos();
 
@@ -630,21 +675,6 @@ void MainWindow::currentInvoiceChanged(int index)
     actuInvoicePath.replace("/","_");
     actuInvoicePath = FacturePath + "/" + actuInvoicePath + ".pdf";
 
-}
-
-void MainWindow::refreshCustomerView(void){
-
-    ui->CustomerTableView->resizeColumnsToContents();
-}
-
-void MainWindow::refreshCoursesView(void){
-
-    ui->CoursesTableView->resizeColumnsToContents();
-}
-
-void MainWindow::refreshConstatView(){
-
-    ui->ConstatTableView->resizeColumnsToContents();
 }
 
 void MainWindow::updateButtons(int row){
@@ -781,15 +811,13 @@ void MainWindow::onInvoiceDataChanged()
 {
     if (!unsavedElemList.contains("InvoiceData",Qt::CaseSensitive))unsavedElemList << "InvoiceData";
     ui->saveInvoice->setEnabled(true);
-    refreshCoursesView();
-    refreshConstatView();
 }
 
 void MainWindow::onCustomerDataChanged(void)
 {
     if (!unsavedElemList.contains("CustomerData",Qt::CaseSensitive))unsavedElemList << "CustomerData";
     ui->SaveCustomer->setEnabled(true);
-    refreshCustomerView();
+
 }
 
 void MainWindow::actualiseAmountField(float subtotal, float total)

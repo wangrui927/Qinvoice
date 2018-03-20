@@ -20,6 +20,7 @@
         <file>dependencies/icon/Refresh-icon.png</file>
         <file>dependencies/icon/open-file-icon.png</file>
         <file>dependencies/icon/duplicate.png</file>
+        <file>dependencies/icon/resend-icon.png</file>
     </qresource>
     <qresource prefix="/pictures">
         <file>dependencies/pictures/splash.png</file>

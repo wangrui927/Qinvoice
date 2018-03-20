@@ -37,7 +37,8 @@ SOURCES +=  main.cpp\
             searchdelegate.cpp \
             runGuard.cpp \
             qinvoiceutil.cpp \
-    qinvoiceini.cpp
+            qinvoiceini.cpp
+
 
 HEADERS  += mainwindow.h \
             invoicedb.h \
@@ -48,7 +49,8 @@ HEADERS  += mainwindow.h \
             searchdelegate.h \
             runGuard.h \
             qinvoiceutil.h \
-    qinvoiceini.h
+            qinvoiceini.h
+
 
 FORMS    += mainwindow.ui \
             login.ui \

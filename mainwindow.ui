@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>844</width>
+    <width>898</width>
     <height>480</height>
    </rect>
   </property>
@@ -24,7 +24,7 @@
     <normaloff>:/icons/dependencies/icon/Program_icon.png</normaloff>:/icons/dependencies/icon/Program_icon.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout_17">
+   <layout class="QVBoxLayout" name="verticalLayout_19">
     <item>
      <widget class="QTabWidget" name="InvoiveView">
       <property name="font">
@@ -33,7 +33,7 @@
        </font>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="CustomerTab">
        <attribute name="title">
@@ -1452,123 +1452,36 @@
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_16">
         <item>
-         <layout class="QVBoxLayout" name="verticalLayout_12">
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_10">
+         <widget class="QSplitter" name="splitter">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <widget class="QWidget" name="layoutWidget">
+           <layout class="QVBoxLayout" name="verticalLayout_18">
             <item>
-             <spacer name="horizontalSpacer_12">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeType">
-               <enum>QSizePolicy::Fixed</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>20</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item>
-             <layout class="QHBoxLayout" name="horizontalLayout">
+             <layout class="QHBoxLayout" name="horizontalLayout_10">
               <item>
-               <widget class="QGroupBox" name="DategroupBox">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="title">
-                 <string>Date</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-                <property name="checked">
-                 <bool>false</bool>
-                </property>
-                <layout class="QHBoxLayout" name="horizontalLayout_14">
-                 <item>
-                  <layout class="QFormLayout" name="formLayout_2">
-                   <item row="0" column="0">
-                    <widget class="QLabel" name="startDateLabel">
-                     <property name="text">
-                      <string>StartDate</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="0" column="1">
-                    <widget class="QDateEdit" name="StartDateEdit">
-                     <property name="minimumSize">
-                      <size>
-                       <width>120</width>
-                       <height>24</height>
-                      </size>
-                     </property>
-                     <property name="autoFillBackground">
-                      <bool>true</bool>
-                     </property>
-                     <property name="displayFormat">
-                      <string>dd.MM.yyyy</string>
-                     </property>
-                     <property name="calendarPopup">
-                      <bool>true</bool>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="0">
-                    <widget class="QLabel" name="endDateLabel">
-                     <property name="text">
-                      <string>EndDate</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="1">
-                    <widget class="QDateEdit" name="EndDateEdit">
-                     <property name="autoFillBackground">
-                      <bool>true</bool>
-                     </property>
-                     <property name="displayFormat">
-                      <string>dd.MM.yyyy</string>
-                     </property>
-                     <property name="calendarPopup">
-                      <bool>true</bool>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
-                 </item>
-                </layout>
-               </widget>
-              </item>
-              <item>
-               <spacer name="horizontalSpacer_9">
+               <spacer name="horizontalSpacer_12">
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
                 </property>
                 <property name="sizeType">
-                 <enum>QSizePolicy::Expanding</enum>
+                 <enum>QSizePolicy::Fixed</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
-                  <width>40</width>
+                  <width>20</width>
                   <height>20</height>
                  </size>
                 </property>
                </spacer>
               </item>
               <item>
-               <layout class="QGridLayout" name="gridLayout_5">
-                <item row="2" column="1">
-                 <widget class="QComboBox" name="SStatusCombo">
+               <layout class="QHBoxLayout" name="horizontalLayout">
+                <item>
+                 <widget class="QGroupBox" name="DategroupBox">
                   <property name="enabled">
-                   <bool>false</bool>
+                   <bool>true</bool>
                   </property>
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -1576,220 +1489,298 @@
                     <verstretch>0</verstretch>
                    </sizepolicy>
                   </property>
-                  <property name="maximumSize">
+                  <property name="title">
+                   <string>Date</string>
+                  </property>
+                  <property name="checkable">
+                   <bool>true</bool>
+                  </property>
+                  <property name="checked">
+                   <bool>false</bool>
+                  </property>
+                  <layout class="QHBoxLayout" name="horizontalLayout_14">
+                   <item>
+                    <layout class="QFormLayout" name="formLayout_2">
+                     <item row="0" column="0">
+                      <widget class="QLabel" name="startDateLabel">
+                       <property name="text">
+                        <string>StartDate</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="0" column="1">
+                      <widget class="QDateEdit" name="StartDateEdit">
+                       <property name="minimumSize">
+                        <size>
+                         <width>120</width>
+                         <height>24</height>
+                        </size>
+                       </property>
+                       <property name="autoFillBackground">
+                        <bool>true</bool>
+                       </property>
+                       <property name="displayFormat">
+                        <string>dd.MM.yyyy</string>
+                       </property>
+                       <property name="calendarPopup">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="1" column="0">
+                      <widget class="QLabel" name="endDateLabel">
+                       <property name="text">
+                        <string>EndDate</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="1" column="1">
+                      <widget class="QDateEdit" name="EndDateEdit">
+                       <property name="autoFillBackground">
+                        <bool>true</bool>
+                       </property>
+                       <property name="displayFormat">
+                        <string>dd.MM.yyyy</string>
+                       </property>
+                       <property name="calendarPopup">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
+                  </layout>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_9">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeType">
+                   <enum>QSizePolicy::Expanding</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
                    <size>
-                    <width>100</width>
-                    <height>16777215</height>
+                    <width>40</width>
+                    <height>20</height>
                    </size>
                   </property>
-                 </widget>
+                 </spacer>
                 </item>
-                <item row="0" column="0">
-                 <widget class="QCheckBox" name="CustomerCheckBox">
-                  <property name="enabled">
-                   <bool>true</bool>
-                  </property>
-                  <property name="autoFillBackground">
-                   <bool>false</bool>
-                  </property>
-                  <property name="text">
-                   <string>Customer</string>
-                  </property>
-                  <property name="tristate">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
+                <item>
+                 <layout class="QGridLayout" name="gridLayout_5">
+                  <item row="2" column="1">
+                   <widget class="QComboBox" name="SStatusCombo">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>100</width>
+                      <height>16777215</height>
+                     </size>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="0">
+                   <widget class="QCheckBox" name="CustomerCheckBox">
+                    <property name="enabled">
+                     <bool>true</bool>
+                    </property>
+                    <property name="autoFillBackground">
+                     <bool>false</bool>
+                    </property>
+                    <property name="text">
+                     <string>Customer</string>
+                    </property>
+                    <property name="tristate">
+                     <bool>false</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="1">
+                   <widget class="QComboBox" name="SCustomerCombo">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="0">
+                   <widget class="QCheckBox" name="StatusCheckBox">
+                    <property name="enabled">
+                     <bool>true</bool>
+                    </property>
+                    <property name="text">
+                     <string>Status</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="0">
+                   <widget class="QCheckBox" name="invNbrCheckbox">
+                    <property name="text">
+                     <string>Invoice Nbr</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="1">
+                   <widget class="QLineEdit" name="InvNbrLineEdit">
+                    <property name="enabled">
+                     <bool>false</bool>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
                 </item>
-                <item row="0" column="1">
-                 <widget class="QComboBox" name="SCustomerCombo">
-                  <property name="enabled">
-                   <bool>false</bool>
+                <item>
+                 <spacer name="horizontalSpacer_3">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
                   </property>
-                 </widget>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>13</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
                 </item>
-                <item row="2" column="0">
-                 <widget class="QCheckBox" name="StatusCheckBox">
-                  <property name="enabled">
-                   <bool>true</bool>
-                  </property>
-                  <property name="text">
-                   <string>Status</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="0">
-                 <widget class="QCheckBox" name="invNbrCheckbox">
-                  <property name="text">
-                   <string>Invoice Nbr</string>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="1">
-                 <widget class="QLineEdit" name="InvNbrLineEdit">
-                  <property name="enabled">
-                   <bool>false</bool>
-                  </property>
-                 </widget>
+                <item>
+                 <layout class="QGridLayout" name="gridLayout_6">
+                  <item row="0" column="0">
+                   <widget class="QPushButton" name="openInvoiceview">
+                    <property name="minimumSize">
+                     <size>
+                      <width>45</width>
+                      <height>45</height>
+                     </size>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="invoiceressources.qrc">
+                      <normaloff>:/icons/dependencies/icon/open-file-icon.png</normaloff>:/icons/dependencies/icon/open-file-icon.png</iconset>
+                    </property>
+                    <property name="iconSize">
+                     <size>
+                      <width>32</width>
+                      <height>32</height>
+                     </size>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="0">
+                   <widget class="QPushButton" name="refreshSearch">
+                    <property name="enabled">
+                     <bool>true</bool>
+                    </property>
+                    <property name="minimumSize">
+                     <size>
+                      <width>45</width>
+                      <height>45</height>
+                     </size>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="invoiceressources.qrc">
+                      <normaloff>:/icons/dependencies/icon/Refresh-icon.png</normaloff>:/icons/dependencies/icon/Refresh-icon.png</iconset>
+                    </property>
+                    <property name="iconSize">
+                     <size>
+                      <width>25</width>
+                      <height>25</height>
+                     </size>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="0">
+                   <widget class="QPushButton" name="sendCumul">
+                    <property name="minimumSize">
+                     <size>
+                      <width>45</width>
+                      <height>45</height>
+                     </size>
+                    </property>
+                    <property name="text">
+                     <string/>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="invoiceressources.qrc">
+                      <normaloff>:/icons/dependencies/icon/mail-icon.png</normaloff>:/icons/dependencies/icon/mail-icon.png</iconset>
+                    </property>
+                    <property name="iconSize">
+                     <size>
+                      <width>35</width>
+                      <height>35</height>
+                     </size>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
                 </item>
                </layout>
               </item>
               <item>
-               <spacer name="horizontalSpacer_3">
+               <spacer name="horizontalSpacer_13">
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
                 </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Fixed</enum>
+                </property>
                 <property name="sizeHint" stdset="0">
                  <size>
-                  <width>13</width>
+                  <width>20</width>
                   <height>20</height>
                  </size>
                 </property>
                </spacer>
               </item>
-              <item>
-               <layout class="QGridLayout" name="gridLayout_6">
-                <item row="0" column="0">
-                 <widget class="QPushButton" name="openInvoiceview">
-                  <property name="minimumSize">
-                   <size>
-                    <width>45</width>
-                    <height>45</height>
-                   </size>
-                  </property>
-                  <property name="text">
-                   <string/>
-                  </property>
-                  <property name="icon">
-                   <iconset resource="invoiceressources.qrc">
-                    <normaloff>:/icons/dependencies/icon/open-file-icon.png</normaloff>:/icons/dependencies/icon/open-file-icon.png</iconset>
-                  </property>
-                  <property name="iconSize">
-                   <size>
-                    <width>32</width>
-                    <height>32</height>
-                   </size>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="0">
-                 <widget class="QPushButton" name="refreshSearch">
-                  <property name="enabled">
-                   <bool>true</bool>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>45</width>
-                    <height>45</height>
-                   </size>
-                  </property>
-                  <property name="text">
-                   <string/>
-                  </property>
-                  <property name="icon">
-                   <iconset resource="invoiceressources.qrc">
-                    <normaloff>:/icons/dependencies/icon/Refresh-icon.png</normaloff>:/icons/dependencies/icon/Refresh-icon.png</iconset>
-                  </property>
-                  <property name="iconSize">
-                   <size>
-                    <width>25</width>
-                    <height>25</height>
-                   </size>
-                  </property>
-                 </widget>
-                </item>
-                <item row="1" column="0">
-                 <widget class="QPushButton" name="sendCumul">
-                  <property name="minimumSize">
-                   <size>
-                    <width>45</width>
-                    <height>45</height>
-                   </size>
-                  </property>
-                  <property name="text">
-                   <string/>
-                  </property>
-                  <property name="icon">
-                   <iconset resource="invoiceressources.qrc">
-                    <normaloff>:/icons/dependencies/icon/mail-icon.png</normaloff>:/icons/dependencies/icon/mail-icon.png</iconset>
-                  </property>
-                  <property name="iconSize">
-                   <size>
-                    <width>35</width>
-                    <height>35</height>
-                   </size>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
              </layout>
             </item>
             <item>
-             <spacer name="horizontalSpacer_13">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeType">
-               <enum>QSizePolicy::Fixed</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>20</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <spacer name="verticalSpacer_9">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeType">
-             <enum>QSizePolicy::Preferred</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>40</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <layout class="QVBoxLayout" name="verticalLayout_11">
-            <item>
-             <widget class="QLabel" name="label_3">
-              <property name="font">
-               <font>
-                <pointsize>10</pointsize>
-                <weight>75</weight>
-                <bold>true</bold>
-                <underline>true</underline>
-               </font>
-              </property>
-              <property name="text">
-               <string>Invoice Search Result:</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="verticalSpacer_10">
-              <property name="orientation">
-               <enum>Qt::Vertical</enum>
-              </property>
-              <property name="sizeType">
-               <enum>QSizePolicy::Fixed</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>20</width>
-                <height>13</height>
-               </size>
-              </property>
-             </spacer>
+             <layout class="QVBoxLayout" name="verticalLayout_11">
+              <item>
+               <widget class="QLabel" name="label_3">
+                <property name="font">
+                 <font>
+                  <pointsize>10</pointsize>
+                  <weight>75</weight>
+                  <bold>true</bold>
+                  <underline>true</underline>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Invoice Search Result:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer_10">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Fixed</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>13</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
             </item>
             <item>
              <widget class="QTableView" name="SearchInvoiceView">
@@ -1802,8 +1793,107 @@
              </widget>
             </item>
            </layout>
-          </item>
-         </layout>
+          </widget>
+          <widget class="QFrame" name="frame_3">
+           <property name="frameShape">
+            <enum>QFrame::StyledPanel</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Sunken</enum>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_17">
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_12">
+              <item>
+               <layout class="QHBoxLayout" name="horizontalLayout_9">
+                <item>
+                 <spacer name="horizontalSpacer_17">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeType">
+                   <enum>QSizePolicy::MinimumExpanding</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="SendRemider">
+                  <property name="minimumSize">
+                   <size>
+                    <width>200</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="invoiceressources.qrc">
+                    <normaloff>:/icons/dependencies/icon/resend-icon.png</normaloff>:/icons/dependencies/icon/resend-icon.png</iconset>
+                  </property>
+                  <property name="iconSize">
+                   <size>
+                    <width>50</width>
+                    <height>50</height>
+                   </size>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_18">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeType">
+                   <enum>QSizePolicy::MinimumExpanding</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </item>
+              <item>
+               <spacer name="verticalSpacer_9">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeType">
+                 <enum>QSizePolicy::Fixed</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QTableView" name="RelaunchInvoiceView">
+                <property name="font">
+                 <font>
+                  <weight>50</weight>
+                  <bold>false</bold>
+                 </font>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -1906,7 +1996,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>844</width>
+     <width>898</width>
      <height>22</height>
     </rect>
    </property>

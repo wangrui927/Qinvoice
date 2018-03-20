@@ -119,7 +119,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
     QStringList unsavedElemList;
-    QSqlRelationalTableModel *invoiceModel,*CustomerModel, *SearchInvoiceModel;
+    QSqlRelationalTableModel *invoiceModel,*CustomerModel, *SearchInvoiceModel, *RelaunchInvoiceModel;
     QDataWidgetMapper *mapper;
     QStringListModel *typeModel;
     QSqlTableModel *CoursesModel;
@@ -216,9 +216,6 @@ private:
     int reportGroup;
     void initialiseUI(void);
     void goToInvoice(int invoiceID);
-    void refreshCoursesView(void);
-    void refreshConstatView(void);
-    void refreshCustomerView(void);
     void showError(const QSqlError &err);
     bool okayToClose(void);
     float getCoursesTVA1Sum(int record);
