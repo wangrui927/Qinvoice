@@ -60,7 +60,6 @@ RESOURCES += \
             invoiceressources.qrc
 include($$PWD/QtRptProject/QtRPT/QtRPT.pri)
 
-
 # run target after build prozess
 !win32
 {

@@ -22,8 +22,6 @@ int main(int argc, char *argv[])
     QString DBpath;
     QString iniFilePath = QString("%1/dependencies/Qinvoice.ini").arg(QApplication::applicationDirPath());
 
-
-
     /*
      *  Splashscreen
      */
@@ -54,17 +52,77 @@ int main(int argc, char *argv[])
      * Load actual database.Take (actualyear-1) if actualyear not created yet
      */
     DBpath = QString("%1/dependencies/InvoiceToolDB_%2.db3").arg(QApplication::applicationDirPath()).arg(QDate::currentDate().year());
+    bool createNewDBFlag = false;
 
     if(!QFileInfo(DBpath).exists())
     {
-        DBpath = QString("%1/dependencies/InvoiceToolDB_%2.db3").arg(QApplication::applicationDirPath()).arg(QDate::currentDate().year()-1);
-        QString tmp = QString("Remember to archive the %1 Database and create the %2 Database. Use the archive function in menu file").arg(QDate::currentDate().year()-1).arg(QDate::currentDate().year());
-        QMessageBox::warning(splash,"",tmp,QMessageBox::Ok);
+        QString DBpath_previous = QString("%1/dependencies/InvoiceToolDB_%2.db3").arg(QApplication::applicationDirPath()).arg(QDate::currentDate().year()-1);
+
+        if(!QFileInfo(DBpath_previous).exists())
+        {
+            /* Create New Database */
+            createNewDBFlag = true;
+        }
+        else
+        {
+            /* Load last year database */
+            QString tmp = QString("Remember to archive the %1 Database and create the %2 Database. Use the archive function in menu file").arg(QDate::currentDate().year()-1).arg(QDate::currentDate().year());
+            QMessageBox::warning(splash,"",tmp,QMessageBox::Ok);
+        }
     }
 
     InvoiceDB invDB = InvoiceDB(DBpath);
-    if(!invDB.createConnection())
-        return 1;
+    if(!invDB.createConnection()) return 1;
+
+    /* Create necessary Tables when flag is set*/
+    if (createNewDBFlag == true)
+    {
+        QSqlQuery query;
+        query.exec(
+                "CREATE TABLE Invoices ("
+                "`InvoiceID`     INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"
+                "`CustomerID`    INTEGER NOT NULL,"
+                "`InvoiceDate`   TEXT NOT NULL,"
+                "`InvoiceNbr`    TEXT,"
+                "`Status`        INTEGER,"
+                "`SentOn`	     TEXT,"
+                "`Notes`         TEXT,"
+                "FOREIGN KEY(`CustomerID`) REFERENCES `Customers` ON DELETE CASCADE ON UPDATE CASCADE)"
+        );
+
+        query.exec(
+                  "CREATE TABLE Customers (CustomerID INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,CompanyName	TEXT,Name TEXT,Address	TEXT,PostalCode	NUMERIC,City	TEXT,CountryOrRegion	TEXT,EmailAddress	TEXT,Notes	TEXT)"
+        );
+
+        query.exec(
+                    "CREATE TABLE Courses ("
+                        "`CoursesID`	INTEGER NOT NULL,"
+                        "`PickUpDate`	TEXT,"
+                        " `Reference`	TEXT,"
+                        "`SchippingLocation`	TEXT,"
+                        " `ShippedFrom`	TEXT,"
+                        "`DeliveryLocation`	TEXT,"
+                        "`TVA`	INTEGER,"
+                        "`PaymentAmount`	REAL,"
+                        "`InvoiceID`	INTEGER NOT NULL,"
+                        "PRIMARY KEY(CoursesID,InvoiceID),"
+                        "FOREIGN KEY(`InvoiceID`) REFERENCES `Invoices` ON DELETE CASCADE ON UPDATE CASCADE)"
+        );
+
+        query.exec(
+                    "CREATE TABLE Constat ("
+                        "`ConstatID`	INTEGER NOT NULL,"
+                        "`ServiceDate`	TEXT,"
+                        "`ServiceLocation`	TEXT,"
+                        " `Reference`	TEXT,"
+                        "`TVA`	INTEGER,"
+                        "`PaymentAmount`	REAL,"
+                        " `InvoiceID`	INTEGER NOT NULL,"
+                        "PRIMARY KEY(ConstatID,InvoiceID),"
+                        "FOREIGN KEY(`InvoiceID`) REFERENCES `Invoices` ON DELETE CASCADE ON UPDATE CASCADE)"
+        );
+    }
+
     splash->showMessage(QObject::tr("Connected "),topRight, Qt::white);
 
     /*
@@ -149,7 +207,9 @@ int main(int argc, char *argv[])
     splash->finish(&w);
     delete splash;
     return a.exec();
+
 }
+
 
 void delay( int millisecondsToWait )
 {

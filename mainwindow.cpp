@@ -219,13 +219,14 @@ void MainWindow::initialiseUI()
     {
         ui->CustomerTableView->horizontalHeader()->setSectionResizeMode(c, QHeaderView::Stretch);
     }
+
     /*
      * Search Tab
      */
     SearchInvoiceModel = new QSqlRelationalTableModel(this);
     SearchInvoiceModel->setTable("Invoices");
 
-    /*sql join customer name (from Table Customer) and CustomerID (from table Invoice)*/
+    /* sql join customer name (from Table Customer) and CustomerID (from table Invoice) */
     SearchInvoiceModel->setRelation(invoice_CustomerID, QSqlRelation("Customers", "CustomerID", "CompanyName"));
 
     SearchInvoiceModel->setSort(invoice_Id, Qt::AscendingOrder);
@@ -236,6 +237,7 @@ void MainWindow::initialiseUI()
     /*
      * Invoice Head
      */
+    SearchRelationModel = SearchInvoiceModel->relationModel(invoice_CustomerID);
 
     QDate today = QDate::currentDate();
     ui->StartDateEdit->setDate(today.addDays(-15));
@@ -262,13 +264,15 @@ void MainWindow::initialiseUI()
     ui->SearchInvoiceView->setColumnHidden(SearchInvoiceModel->fieldIndex("SentOn"), true);
     ui->SearchInvoiceView->setItemDelegate(new SearchDelegate(SearchTab_invoiceDate, SearchTab_Satus));
 
-    ui->SCustomerCombo->setModel(relationModel);
-    ui->SCustomerCombo->setModelColumn(relationModel->fieldIndex("CompanyName"));
     // Resize table column to width
     for (int c = 0; c < ui->SearchInvoiceView->horizontalHeader()->count(); ++c)
     {
         ui->SearchInvoiceView->horizontalHeader()->setSectionResizeMode(c, QHeaderView::Stretch);
     }
+
+    ui->SCustomerCombo->setModel(relationModel);
+    ui->SCustomerCombo->setModelColumn(relationModel->fieldIndex("CompanyName"));
+
 
 /*
  * RelaunchInvoiceView
@@ -285,18 +289,24 @@ void MainWindow::initialiseUI()
     ui->RelaunchInvoiceView->setColumnHidden(RelaunchInvoiceModel->fieldIndex("InvoiceID"), true);
     ui->RelaunchInvoiceView->setColumnHidden(RelaunchInvoiceModel->fieldIndex("Status"), true);
     ui->RelaunchInvoiceView->setColumnHidden(RelaunchInvoiceModel->fieldIndex("Notes"), true);
-
+    QString Relaunchfilter = QString("Status = 0 and InvoiceDate <= date('now','-2 days')");
+    RelaunchInvoiceModel->setFilter(Relaunchfilter);
     // Resize table column to width
     for (int c = 0; c < ui->RelaunchInvoiceView->horizontalHeader()->count(); ++c)
     {
         ui->RelaunchInvoiceView->horizontalHeader()->setSectionResizeMode(c, QHeaderView::Stretch);
     }
 
-
-
+    // generate plot
     plotInit();
 }
 
+void MainWindow::actualiseAllViews()
+{
+
+    RelaunchInvoiceModel->select();
+
+}
 
 void MainWindow:: plotInit(void)
 {
@@ -796,6 +806,8 @@ void MainWindow::on_saveInvoice_clicked()
         int row = mapper->currentIndex();
         mapper->setCurrentIndex(qMin(row, invoiceModel->rowCount() - 1));
         mapper->submit(); // Call to update invoiceNbr in invoices when new invoice is created
+        
+        actualiseAllViews();
     }
 
 
@@ -2345,9 +2357,7 @@ void MainWindow::on_SaveCustomer_clicked()
 
         ui->SaveCustomer->setEnabled(false);
         ui->cancelAddNewCustomer->setEnabled(false);
-
-        relationModel->select(); // update customer combobox
-        invoiceModel->select();
+        actualiseAllViews();
         mapper->toLast();
     }
 }
@@ -2475,6 +2485,7 @@ void MainWindow::on_refreshSearch_clicked()
 
     ui->openInvoiceview->setEnabled(SearchInvoiceModel->rowCount()>0);
     ui->sendCumul->setEnabled(SearchInvoiceModel->rowCount()>0);
+
 }
 
 QVector<int> MainWindow::getInvoiceList(QString record)
@@ -3167,3 +3178,4 @@ void MainWindow::on_actionAbout_triggered()
 {
     QMessageBox::about(this, "About", QString("VLK Express.\nQInvoice tool (%1)").arg(this->ToolVersion));
 }
+

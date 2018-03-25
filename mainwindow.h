@@ -116,6 +116,8 @@ private slots:
 
     void on_actionAbout_triggered();
 
+
+
 private:
     Ui::MainWindow *ui;
     QStringList unsavedElemList;
@@ -238,6 +240,6 @@ private:
     int getInvoiceIDfromInvoiceNbr(const QString& InvoiceNbr);
     float getMontantHTCumulReport(int tva, const QString& companyname);
     void resetGuiElementsAfterInvoiceSaved(void);
-
+    void actualiseAllViews();
 };
 #endif // MAINWINDOW_H

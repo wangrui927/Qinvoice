@@ -33,6 +33,6 @@ NEU:
    1. Send cumul_report to Client via button
    2. Critical Message when Mail wasn t send
    3. Mail Subject can now be set via gui
-
+   4. Generate new database when no one found
 BUGFIX:
    1. MailContent/Subject rewrite from gui fixed.
