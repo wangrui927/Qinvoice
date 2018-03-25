@@ -15,7 +15,7 @@ void MyDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, co
     {
         QString text = index.model()->data(index, Qt::DisplayRole).toDate().toString("dd.MM.yyyy");
         QStyleOptionViewItem myOption = option;
-        myOption.displayAlignment = Qt::AlignRight | Qt::AlignVCenter;
+        myOption.displayAlignment =  Qt::AlignCenter | Qt::AlignVCenter;
 
         drawDisplay(painter, myOption, myOption.rect, text);
         drawFocus(painter, myOption, myOption.rect);
@@ -32,7 +32,9 @@ void MyDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, co
     }
     else
     {
-        QItemDelegate::paint(painter, option, index);
+        QStyleOptionViewItem myOption = option;
+        myOption.displayAlignment =  Qt::AlignCenter | Qt::AlignVCenter;
+        QItemDelegate::paint(painter, myOption, index);
     }
 
 }

@@ -212,6 +212,7 @@ void MainWindow::initialiseUI()
     ui->CustomerTableView->resizeColumnsToContents();
     ui->CustomerTableView->setColumnHidden(CustomerModel->fieldIndex("CustomerID"), true);
     ui->CustomerTableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->CustomerTableView-> setItemDelegate(new genericTableViewDelegate);
     connect(ui->CustomerTableView->model(), SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(onCustomerDataChanged()));
 
     // Resize table column to width
@@ -289,6 +290,7 @@ void MainWindow::initialiseUI()
     ui->RelaunchInvoiceView->setColumnHidden(RelaunchInvoiceModel->fieldIndex("InvoiceID"), true);
     ui->RelaunchInvoiceView->setColumnHidden(RelaunchInvoiceModel->fieldIndex("Status"), true);
     ui->RelaunchInvoiceView->setColumnHidden(RelaunchInvoiceModel->fieldIndex("Notes"), true);
+    ui->RelaunchInvoiceView-> setItemDelegate(new genericTableViewDelegate);
     QString Relaunchfilter = QString("Status = 0 and InvoiceDate <= date('now','-2 days')");
     RelaunchInvoiceModel->setFilter(Relaunchfilter);
     // Resize table column to width

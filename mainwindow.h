@@ -7,6 +7,7 @@
 #include "mydelegate.h"
 #include "searchdelegate.h"
 #include "qinvoiceutil.h"
+#include "generictableviewdelegate.h"
 
 
 namespace Ui {

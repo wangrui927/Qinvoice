@@ -37,7 +37,8 @@ SOURCES +=  main.cpp\
             searchdelegate.cpp \
             runGuard.cpp \
             qinvoiceutil.cpp \
-            qinvoiceini.cpp
+            qinvoiceini.cpp \
+    generictableviewdelegate.cpp
 
 
 HEADERS  += mainwindow.h \
@@ -49,7 +50,8 @@ HEADERS  += mainwindow.h \
             searchdelegate.h \
             runGuard.h \
             qinvoiceutil.h \
-            qinvoiceini.h
+            qinvoiceini.h \
+    generictableviewdelegate.h
 
 
 FORMS    += mainwindow.ui \
