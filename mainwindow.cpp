@@ -287,9 +287,17 @@ void MainWindow::initialiseUI()
     if (!RelaunchInvoiceModel->select())
         qDebug() << RelaunchInvoiceModel->lastError();
     ui->RelaunchInvoiceView->setModel(RelaunchInvoiceModel);
+    ui->RelaunchInvoiceView->setEditTriggers(QAbstractItemView::NoEditTriggers);;
+    ui->RelaunchInvoiceView->horizontalHeader()->moveSection(RelaunchInvoiceModel->fieldIndex("InvoiceNbr")  ,0);
+    ui->RelaunchInvoiceView->horizontalHeader()->moveSection(RelaunchInvoiceModel->fieldIndex("CompanyName") ,1);
+    ui->RelaunchInvoiceView->horizontalHeader()->moveSection(RelaunchInvoiceModel->fieldIndex("InvoiceDate") ,2);
+    ui->RelaunchInvoiceView->horizontalHeader()->moveSection(RelaunchInvoiceModel->fieldIndex("SentOn")      ,3);
+
+    /* Hide some colomn */
     ui->RelaunchInvoiceView->setColumnHidden(RelaunchInvoiceModel->fieldIndex("InvoiceID"), true);
     ui->RelaunchInvoiceView->setColumnHidden(RelaunchInvoiceModel->fieldIndex("Status"), true);
     ui->RelaunchInvoiceView->setColumnHidden(RelaunchInvoiceModel->fieldIndex("Notes"), true);
+
     ui->RelaunchInvoiceView-> setItemDelegate(new genericTableViewDelegate);
     QString Relaunchfilter = QString("Status = 0 and InvoiceDate <= date('now','-2 days')");
     RelaunchInvoiceModel->setFilter(Relaunchfilter);
@@ -299,7 +307,6 @@ void MainWindow::initialiseUI()
         ui->RelaunchInvoiceView->horizontalHeader()->setSectionResizeMode(c, QHeaderView::Stretch);
     }
 
-    // generate plot
     plotInit();
 }
 
@@ -2707,7 +2714,7 @@ int MainWindow::sendMail(void)
     }
 
     MailContent MContent;
-    MContent.setMailInfos(MailText,CustomerMail, Subject);
+    MContent.setMailInfos(MailText,CustomerMail, Subject, actuInvoicePath);
     if(!MContent.exec())
     {
         return 1;
@@ -3078,6 +3085,7 @@ void MainWindow::on_sendCumul_clicked()
 }
 
 
+
 int MainWindow::sendMailWithParam(QString AttachmentPath)
 {
     int error = 1;
@@ -3137,7 +3145,7 @@ int MainWindow::sendMailWithParam(QString AttachmentPath)
                        "V.L.K. Express\n").arg(CustomerName).arg(this->UserName);
 
     MailContent MContent;
-    MContent.setMailInfos(MailText,CustomerMail, Subject);
+    MContent.setMailInfos(MailText,CustomerMail, Subject, AttachmentPath);
     if(!MContent.exec())
     {
         return 1;
@@ -3181,3 +3189,109 @@ void MainWindow::on_actionAbout_triggered()
     QMessageBox::about(this, "About", QString("VLK Express.\nQInvoice tool (%1)").arg(this->ToolVersion));
 }
 
+int MainWindow::sendMailWithParameters(invoiceMailStruct_t &InvoiceStruct)
+{
+    int error = 1;
+    QSqlQuery query;
+    QString CustomerName,CustomerMail;
+
+    query.exec(QString("select Name, EmailAddress From Invoices inner join Customers on Invoices.CustomerID = Customers.CustomerID where InvoiceNbr = '%1'").arg(InvoiceStruct.InvoiceID));
+    while (query.next())
+    {
+        CustomerName = query.value(0).toString();
+        CustomerMail = query.value(1).toString();
+    }
+    QString myMail = this->MailAddress;
+
+    /*Get mail provider*/
+    QString mailProvider;
+    QString strPattern = ".*@([A-Za-z0-9.-]+\\.[A-Za-z]{2,4})";
+    QRegExp rxlen(strPattern);
+    int pos = rxlen.indexIn(this->MailAddress);
+    if (pos > -1) {
+        mailProvider = rxlen.cap(1);
+    }
+
+    QString smtpProvider = "";
+
+    /*if ((QString::compare(mailProvider, "yahoo.fr", Qt::CaseInsensitive) == 0) || (QString::compare(mailProvider, "yahoo.com", Qt::CaseInsensitive) == 0))
+        smtpProvider = "smtp.mail.yahoo.com";
+    else if(QString::compare(mailProvider, "gmail.com", Qt::CaseInsensitive) == 0)
+    {
+        smtpProvider = "smtp.gmail.com";
+    }
+    else
+    {
+        qDebug() << "ERROR: Only yahoo or gmail accounts are currently supported";
+        return 1;
+    }*/
+
+    SmtpClient smtp(smtpProvider, 465, SmtpClient::SslConnection);
+    smtp.setUser(myMail);
+    smtp.setPassword(UserPassword);
+
+    MimeMessage message;
+
+    message.setSender(new EmailAddress(myMail,this->UserName));
+    message.addRecipient(new EmailAddress(CustomerMail, CustomerName));
+    message.addBcc(new EmailAddress(this->MailAddress, this->UserName));
+
+    MimeText text;
+    MailContent MContent;
+    MContent.setMailInfos(InvoiceStruct.MailText,CustomerMail, InvoiceStruct.Subject, InvoiceStruct.AttachmentPath);
+
+    if(!MContent.exec())
+    {
+        return 1;
+    }
+    else
+    {
+        InvoiceStruct.MailText = MContent.getMailText();
+        InvoiceStruct.Subject  = MContent.getSubjectContent();
+
+        message.setSubject(InvoiceStruct.Subject);
+        text.setText(InvoiceStruct.MailText);
+        message.addPart(&text);
+        /*
+        message.addPart(new MimeAttachment(new QFile(InvoiceStruct.AttachmentPath)));
+
+        smtp.connectToHost();
+
+        smtp.login();
+        */
+        if(1)//if(smtp.sendMail(message))
+        {
+            error = 0;
+        }
+        else
+        {
+            error = 1;
+        }
+
+        //smtp.quit();
+    }
+
+    return error;
+}
+
+void MainWindow::on_SendRemider_clicked()
+{
+    invoiceMailStruct_t MailStruct;
+    MailStruct.Subject = QString("Relance");
+
+    for (int i = 0; i< ui->RelaunchInvoiceView->model()->rowCount();i++)
+    {
+        MailStruct.InvoiceID = ui->RelaunchInvoiceView->model()->data(ui->RelaunchInvoiceView->model()->index(i,invoice_Nbr)).toString(); /*row, col*/
+
+        MailStruct.AttachmentPath = "";
+        MailStruct.MailText = QString("Bonjour %1\n"
+                                      "Sauf erreur de ma part, le relevet de factures en piece jointe est resté impayé dans mes comptes à ce jour.\n"
+                                      "Dans le cas contraire, merci de me faire parvenir vos preuves de paiements.\n"
+                                      "Cordialement,\n"
+                                      "%2\n"
+                                      "V.L.K. Express\n").arg(ui->RelaunchInvoiceView->model()->data(ui->RelaunchInvoiceView->model()->index(i,invoice_CustomerID)).toString()).arg(this->UserName);
+
+        qDebug() << sendMailWithParameters(MailStruct);
+    }
+
+}

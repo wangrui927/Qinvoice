@@ -119,6 +119,8 @@ private slots:
 
 
 
+    void on_SendRemider_clicked();
+
 private:
     Ui::MainWindow *ui;
     QStringList unsavedElemList;
@@ -145,7 +147,12 @@ private:
     QString workingDirectory, iniFileDirectory;
     QSettings qInvoiceSettings;
     QLabel *DBLabel;
-
+    typedef struct invoiceMailStruct_s {
+        QString InvoiceID;
+        QString Subject;
+        QString MailText;
+        QString AttachmentPath;
+    }invoiceMailStruct_t;
     enum {
         SearchTab_invoiceDate = 2,
         SearchTab_InvoiceNbr  = 3,
@@ -173,8 +180,10 @@ private:
         invoice_Id = 0,
         invoice_CustomerID = 1,
         invoice_Date = 2,
-        invoice_Status = 3,
-        invoice_Notes = 4
+        invoice_Nbr = 3,
+        invoice_Status = 4,
+        invoice_SentOn = 5,
+        invoice_Notes = 6
     };
 
     enum{
@@ -211,10 +220,6 @@ private:
     QString TVANr         ;
     QString TelNr         ;
 
-
-
-
-
     int ReportType;
     int reportGroup;
     void initialiseUI(void);
@@ -242,5 +247,6 @@ private:
     float getMontantHTCumulReport(int tva, const QString& companyname);
     void resetGuiElementsAfterInvoiceSaved(void);
     void actualiseAllViews();
+    int sendMailWithParameters(invoiceMailStruct_t &InvoiceStruct);
 };
 #endif // MAINWINDOW_H

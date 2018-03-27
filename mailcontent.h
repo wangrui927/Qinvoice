@@ -14,17 +14,19 @@ class MailContent : public QDialog
 public:
     explicit MailContent(QWidget *parent = 0);
     ~MailContent();
-    void setMailInfos(const QString &text, QString receiver, QString Subject);
+    void setMailInfos(const QString &text, QString receiver, QString Subject, QString AttachmentPath);
     QString getMailText(void);
     QString getSubjectContent(void);
 
 private:
     Ui::MailContent *ui;
-    QString Mailtext, SubjectContent;
+    QString Mailtext, SubjectContent, PathToAttachment;
 
 private slots:
     void updateMailText(void);
     void updateSubjectContent(void);
+
+    void on_OpenAttachment_clicked();
 };
 
 #endif // MAILCONTENT_H

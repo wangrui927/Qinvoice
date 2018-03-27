@@ -17,10 +17,12 @@ MailContent::~MailContent()
     delete ui;
 }
 
-void MailContent::setMailInfos(const QString &text, QString receiver, QString Subject)
+void MailContent::setMailInfos(const QString &text, QString receiver, QString Subject, QString AttachmentPath)
 {
     Mailtext = text;
     SubjectContent = Subject;
+    PathToAttachment = AttachmentPath;
+
     ui->mailTextEdit->setPlainText(Mailtext);
     ui->toCustomer->setText(receiver);
     ui->SubjectContent->setText(Subject);
@@ -48,4 +50,9 @@ void MailContent::updateMailText(void)
 void MailContent::updateSubjectContent(void)
 {
     SubjectContent = ui->SubjectContent->text();
+}
+
+void MailContent::on_OpenAttachment_clicked()
+{
+    qDebug() << PathToAttachment;
 }
