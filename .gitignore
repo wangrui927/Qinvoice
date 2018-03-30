@@ -1,6 +1,7 @@
 dependencies/DatabaseBackups/
 QInvoice.pro.user*
 SmtpClientforQt/SMTPEmail.pro.user*
-dependencies/Qinvoiceini.xml
 dependencies/InvoiceToolDB_*
-lib/libSMTPEmail.so.1.0.0
+lib/libSMTPEmail.so
+lib/libSMTPEmail.so.1
+lib/libSMTPEmail.so.1.0

@@ -8,7 +8,10 @@
 #include "invoicedb.h"
 #include <QFileInfo>
 #include "qinvoiceutil.h"
+#include "myerror.h"
 
+
+using namespace std;
 
 MainWindow::MainWindow(QString dbpath, QInvoiceSettingsStruct &XMLSettings, QWidget *parent) :
     QMainWindow(parent),
@@ -50,6 +53,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::initialiseUI()
 {
+    MyError *cErr = new MyError();
+
     ReportType  = ReportTypeDefault;
     locale      = QLocale(QLocale::French, QLocale::France);
     FacturePath = QApplication::applicationDirPath() + "/FACTURES";
@@ -298,6 +303,7 @@ void MainWindow::initialiseUI()
     ui->RelaunchInvoiceView->setColumnHidden(RelaunchInvoiceModel->fieldIndex("Status"), true);
     ui->RelaunchInvoiceView->setColumnHidden(RelaunchInvoiceModel->fieldIndex("Notes"), true);
 
+    ui->RelaunchInvoiceView->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->RelaunchInvoiceView-> setItemDelegate(new genericTableViewDelegate);
     QString Relaunchfilter = QString("Status = 0 and InvoiceDate <= date('now','-2 days')");
     RelaunchInvoiceModel->setFilter(Relaunchfilter);
@@ -312,9 +318,10 @@ void MainWindow::initialiseUI()
 
 void MainWindow::actualiseAllViews()
 {
-
+    invoiceModel->select();
+    relationModel->select(); // update customer combobox
     RelaunchInvoiceModel->select();
-
+    goToInvoice(actuInvoiceID); /* Temp fix: this prevent not filling the Client combobox on invoice tab*/
 }
 
 void MainWindow:: plotInit(void)
@@ -597,10 +604,15 @@ void MainWindow:: plotRefresh(void){
 
 void MainWindow:: goToInvoice(int invoiceID)
 {
-    CoursesModel->setFilter(QString("InvoiceID = %1").arg(invoiceID));
-    ConstatModel->setFilter(QString("InvoiceID = %1").arg(invoiceID));
-    CoursesModel->select();
-    ConstatModel->select();
+    int mapperindex=0;
+    QSqlQuery query;
+
+    query.exec(QString("SELECT count(InvoiceID) FROM Invoices WHERE InvoiceID<%1").arg(invoiceID));
+
+    while (query.next()) {
+        mapperindex = query.value(0).toInt();
+    }
+    mapper->setCurrentIndex(mapperindex);
 }
 
 
@@ -1018,9 +1030,9 @@ QString MainWindow::generateReport(int type, int group)
 
         switch (ReportType) {
         case ReportTypeDefault:
-            report->recordCount << 1;
-            report->recordCount << CoursesCount;
-            report->recordCount << ConstatCount;
+            report->recordCount << 1; /* Page 1*/
+            report->recordCount << CoursesCount; /* Page 2*/
+            report->recordCount << ConstatCount; /* Page 3*/
             break;
         case ReportTypeCoursesOnly:
             report->recordCount << 1;
@@ -2366,8 +2378,7 @@ void MainWindow::on_SaveCustomer_clicked()
 
         ui->SaveCustomer->setEnabled(false);
         ui->cancelAddNewCustomer->setEnabled(false);
-        actualiseAllViews();
-        mapper->toLast();
+        actualiseAllViews();      
     }
 }
 
@@ -2565,7 +2576,6 @@ void MainWindow::on_openInvoiceview_clicked()
         while (query.next()) {
             mapperindex = query.value(0).toInt();
         }
-
         mapper->setCurrentIndex(mapperindex);
 
         ui->InvoiveView->setCurrentIndex(1);
@@ -3189,13 +3199,13 @@ void MainWindow::on_actionAbout_triggered()
     QMessageBox::about(this, "About", QString("VLK Express.\nQInvoice tool (%1)").arg(this->ToolVersion));
 }
 
-int MainWindow::sendMailWithParameters(invoiceMailStruct_t &InvoiceStruct)
+bool MainWindow::sendMailWithParameters(invoiceMailStruct_t &InvoiceStruct)
 {
-    int error = 1;
+    bool error = true;
     QSqlQuery query;
     QString CustomerName,CustomerMail;
 
-    query.exec(QString("select Name, EmailAddress From Invoices inner join Customers on Invoices.CustomerID = Customers.CustomerID where InvoiceNbr = '%1'").arg(InvoiceStruct.InvoiceID));
+    query.exec(QString("select Name, EmailAddress From Invoices inner join Customers on Invoices.CustomerID = Customers.CustomerID where InvoiceNbr = '%1'").arg(InvoiceStruct.InvoiceNbr));
     while (query.next())
     {
         CustomerName = query.value(0).toString();
@@ -3214,7 +3224,7 @@ int MainWindow::sendMailWithParameters(invoiceMailStruct_t &InvoiceStruct)
 
     QString smtpProvider = "";
 
-    /*if ((QString::compare(mailProvider, "yahoo.fr", Qt::CaseInsensitive) == 0) || (QString::compare(mailProvider, "yahoo.com", Qt::CaseInsensitive) == 0))
+    if ((QString::compare(mailProvider, "yahoo.fr", Qt::CaseInsensitive) == 0) || (QString::compare(mailProvider, "yahoo.com", Qt::CaseInsensitive) == 0))
         smtpProvider = "smtp.mail.yahoo.com";
     else if(QString::compare(mailProvider, "gmail.com", Qt::CaseInsensitive) == 0)
     {
@@ -3224,7 +3234,7 @@ int MainWindow::sendMailWithParameters(invoiceMailStruct_t &InvoiceStruct)
     {
         qDebug() << "ERROR: Only yahoo or gmail accounts are currently supported";
         return 1;
-    }*/
+    }
 
     SmtpClient smtp(smtpProvider, 465, SmtpClient::SslConnection);
     smtp.setUser(myMail);
@@ -3252,23 +3262,21 @@ int MainWindow::sendMailWithParameters(invoiceMailStruct_t &InvoiceStruct)
         message.setSubject(InvoiceStruct.Subject);
         text.setText(InvoiceStruct.MailText);
         message.addPart(&text);
-        /*
+
         message.addPart(new MimeAttachment(new QFile(InvoiceStruct.AttachmentPath)));
 
         smtp.connectToHost();
-
         smtp.login();
-        */
-        if(1)//if(smtp.sendMail(message))
+
+        if(smtp.sendMail(message))
         {
-            error = 0;
+            error = false;
         }
         else
         {
-            error = 1;
+            error = true;
         }
-
-        //smtp.quit();
+        smtp.quit();
     }
 
     return error;
@@ -3279,19 +3287,55 @@ void MainWindow::on_SendRemider_clicked()
     invoiceMailStruct_t MailStruct;
     MailStruct.Subject = QString("Relance");
 
-    for (int i = 0; i< ui->RelaunchInvoiceView->model()->rowCount();i++)
+    QModelIndexList selection = ui->RelaunchInvoiceView->selectionModel()->selectedRows();
+    if(selection.count() == 0)
     {
-        MailStruct.InvoiceID = ui->RelaunchInvoiceView->model()->data(ui->RelaunchInvoiceView->model()->index(i,invoice_Nbr)).toString(); /*row, col*/
+        QMessageBox::warning(this, "", "Select a least one invoice...",QMessageBox::Ok);
+    }
+    else
+    {
+        for(int i=0; i< selection.count(); i++)
+        {
+            QModelIndex index = selection.at(i);
+            int selRow = index.row();
 
-        MailStruct.AttachmentPath = "";
-        MailStruct.MailText = QString("Bonjour %1\n"
-                                      "Sauf erreur de ma part, le relevet de factures en piece jointe est resté impayé dans mes comptes à ce jour.\n"
-                                      "Dans le cas contraire, merci de me faire parvenir vos preuves de paiements.\n"
-                                      "Cordialement,\n"
-                                      "%2\n"
-                                      "V.L.K. Express\n").arg(ui->RelaunchInvoiceView->model()->data(ui->RelaunchInvoiceView->model()->index(i,invoice_CustomerID)).toString()).arg(this->UserName);
+            MailStruct.InvoiceNbr = ui->RelaunchInvoiceView->model()->data(ui->RelaunchInvoiceView->model()->index(selRow,invoice_Nbr)).toString(); //row, col
+            goToInvoice(ui->RelaunchInvoiceView->model()->data(ui->RelaunchInvoiceView->model()->index(selRow,invoice_Id)).toInt());
+            MailStruct.AttachmentPath = generateReport(saveReport, reportGroup0);
 
-        qDebug() << sendMailWithParameters(MailStruct);
+            MailStruct.MailText = QString("Bonjour %1\n"
+                                          "Sauf erreur de ma part, le relevet de factures en piece jointe est resté impayé dans mes comptes à ce jour.\n"
+                                          "Dans le cas contraire, merci de me faire parvenir vos preuves de paiements.\n"
+                                          "Cordialement,\n"
+                                          "%2\n"
+                                          "V.L.K. Express\n").arg(ui->RelaunchInvoiceView->model()->data(ui->RelaunchInvoiceView->model()->index(selRow,invoice_CustomerID)).toString()).arg(this->UserName);
+
+            bool error = sendMailWithParameters(MailStruct);
+            if(!error)
+            {
+                statusBar()->showMessage(tr("Invoice @%1 sent").arg(MailStruct.InvoiceNbr), 4000);
+            }
+            else
+            {
+                statusBar()->showMessage(tr("Invoice NOT @%1 sent").arg(MailStruct.InvoiceNbr), 4000);
+                QMessageBox::warning(this, "", tr("Invoice NOT @%1 sent").arg(MailStruct.InvoiceNbr),QMessageBox::Ok);
+            };
+        }
     }
 
+
+
+}
+
+void MainWindow::on_actionDebug_triggered()
+{
+    QModelIndexList selection = ui->SearchInvoiceView->selectionModel()->selectedRows();
+
+    qDebug() << selection.count();
+    // Multiple rows can be selected
+    for(int i=0; i< selection.count(); i++)
+    {
+        QModelIndex index = selection.at(i);
+        qDebug() << index.row();
+    }
 }
