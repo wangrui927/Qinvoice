@@ -2049,6 +2049,7 @@
     </property>
     <addaction name="actionAbout"/>
     <addaction name="actionRelease_Notes"/>
+    <addaction name="actionDebug"/>
    </widget>
    <addaction name="menuTool"/>
    <addaction name="menuHelp"/>
@@ -2079,6 +2080,14 @@
   <action name="actionRelease_Notes">
    <property name="text">
     <string>Release Notes</string>
+   </property>
+  </action>
+  <action name="actionDebug">
+   <property name="text">
+    <string>Debug()</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+D</string>
    </property>
   </action>
  </widget>

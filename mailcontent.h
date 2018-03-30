@@ -2,6 +2,8 @@
 #define MAILCONTENT_H
 
 #include <QDialog>
+#include <QFileInfo>
+
 
 namespace Ui {
 class MailContent;

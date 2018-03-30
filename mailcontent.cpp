@@ -1,7 +1,7 @@
 #include "mailcontent.h"
 #include "ui_mailcontent.h"
 #include <QDebug>
-
+#include <QDesktopServices>
 
 MailContent::MailContent(QWidget *parent) :
     QDialog(parent),
@@ -26,7 +26,7 @@ void MailContent::setMailInfos(const QString &text, QString receiver, QString Su
     ui->mailTextEdit->setPlainText(Mailtext);
     ui->toCustomer->setText(receiver);
     ui->SubjectContent->setText(Subject);
-
+    ui->AttachmentPathEdit->setText(QFileInfo(AttachmentPath).fileName());
     // Set Cursor to the end of line
     ui->mailTextEdit->setFocus();
     ui->mailTextEdit->moveCursor ( QTextCursor::End );
@@ -54,5 +54,6 @@ void MailContent::updateSubjectContent(void)
 
 void MailContent::on_OpenAttachment_clicked()
 {
-    qDebug() << PathToAttachment;
+    qDebug() << "Opening " << PathToAttachment;
+    QDesktopServices::openUrl(QUrl::fromLocalFile(PathToAttachment));
 }

@@ -18,7 +18,7 @@ class QDataWidgetMapper;
 class QCPBars;
 class QCPItemText;
 class QtRPT;
-
+class MyError;
 
 class MainWindow : public QMainWindow
 {
@@ -121,6 +121,8 @@ private slots:
 
     void on_SendRemider_clicked();
 
+    void on_actionDebug_triggered();
+
 private:
     Ui::MainWindow *ui;
     QStringList unsavedElemList;
@@ -148,11 +150,14 @@ private:
     QSettings qInvoiceSettings;
     QLabel *DBLabel;
     typedef struct invoiceMailStruct_s {
-        QString InvoiceID;
+        QString InvoiceNbr;
         QString Subject;
         QString MailText;
         QString AttachmentPath;
     }invoiceMailStruct_t;
+
+    MyError *cErr;
+
     enum {
         SearchTab_invoiceDate = 2,
         SearchTab_InvoiceNbr  = 3,
@@ -247,6 +252,6 @@ private:
     float getMontantHTCumulReport(int tva, const QString& companyname);
     void resetGuiElementsAfterInvoiceSaved(void);
     void actualiseAllViews();
-    int sendMailWithParameters(invoiceMailStruct_t &InvoiceStruct);
+    bool sendMailWithParameters(invoiceMailStruct_t &InvoiceStruct);
 };
 #endif // MAINWINDOW_H

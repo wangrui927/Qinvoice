@@ -38,7 +38,8 @@ SOURCES +=  main.cpp\
             runGuard.cpp \
             qinvoiceutil.cpp \
             qinvoiceini.cpp \
-    generictableviewdelegate.cpp
+    generictableviewdelegate.cpp \
+    myerror.cpp
 
 
 HEADERS  += mainwindow.h \
@@ -51,7 +52,8 @@ HEADERS  += mainwindow.h \
             runGuard.h \
             qinvoiceutil.h \
             qinvoiceini.h \
-    generictableviewdelegate.h
+    generictableviewdelegate.h \
+    myerror.h
 
 
 FORMS    += mainwindow.ui \
