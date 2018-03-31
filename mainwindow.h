@@ -19,6 +19,7 @@ class QCPBars;
 class QCPItemText;
 class QtRPT;
 class MyError;
+class Graphic;
 
 class MainWindow : public QMainWindow
 {
@@ -241,6 +242,7 @@ private:
     QString getAddress2(int record);
     QString getAddress3(int record);
     QString generateReport(int type, int group);
+    void InitialiseGraphics(void);
     void plotInit(void);
     void plotRefresh(void);
     void ApplicationShowInfos(QString text, int time_ms);

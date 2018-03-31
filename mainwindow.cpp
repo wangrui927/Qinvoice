@@ -9,9 +9,15 @@
 #include <QFileInfo>
 #include "qinvoiceutil.h"
 #include "myerror.h"
+#include "drilldownchart.h"
+#include "drilldownslice.h"
+#include <QtCharts/QChartView>
+#include <QtCharts/QLegend>
+#include <QtCharts/QPieSeries>
+#include <QtCore/QRandomGenerator>
 
 
-using namespace std;
+QT_CHARTS_USE_NAMESPACE
 
 MainWindow::MainWindow(QString dbpath, QInvoiceSettingsStruct &XMLSettings, QWidget *parent) :
     QMainWindow(parent),
@@ -313,7 +319,8 @@ void MainWindow::initialiseUI()
         ui->RelaunchInvoiceView->horizontalHeader()->setSectionResizeMode(c, QHeaderView::Stretch);
     }
 
-    plotInit();
+    InitialiseGraphics();
+    //plotInit();
 }
 
 void MainWindow::actualiseAllViews()
@@ -324,8 +331,49 @@ void MainWindow::actualiseAllViews()
     goToInvoice(actuInvoiceID); /* Temp fix: this prevent not filling the Client combobox on invoice tab*/
 }
 
+void MainWindow::InitialiseGraphics(void)
+{
+    DrilldownChart *chart = new DrilldownChart();
+    QChartView *chartView = new QChartView(chart);
+    ui->PlotgridLayout->addWidget(chartView);
+
+    chart->setTheme(QChart::ChartThemeLight);
+    chart->setAnimationOptions(QChart::AllAnimations);
+    chart->legend()->setVisible(true);
+    chart->legend()->setAlignment(Qt::AlignRight);
+    QPieSeries *yearSeries = new QPieSeries(ui->PlotgridLayout);
+
+    yearSeries->setName("Sales by year - All");
+
+    const QStringList months = {
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    };
+    const QStringList names = {
+        "Jane", "John", "Axel", "Mary", "Susan", "Bob"
+    };
+
+    for (const QString &name : names) {
+        QPieSeries *series = new QPieSeries(ui->PlotgridLayout);
+        series->setName("Sales by month - " + name);
+
+        for (const QString &month : months)
+            *series << new DrilldownSlice(QRandomGenerator::global()->bounded(1000), month, yearSeries);
+
+        QObject::connect(series, &QPieSeries::clicked, chart, &DrilldownChart::handleSliceClicked);
+
+        *yearSeries << new DrilldownSlice(series->sum(), name, series);
+    }
+
+    QObject::connect(yearSeries, &QPieSeries::clicked, chart, &DrilldownChart::handleSliceClicked);
+
+    chart->changeSeries(yearSeries);
+
+    chartView->setRenderHint(QPainter::Antialiasing);
+}
+
 void MainWindow:: plotInit(void)
 {
+    /*
     // prepare data for bar chart
     QVector<QString> AllCustomers;
     QVector<double> InvoiceTotal;
@@ -504,11 +552,12 @@ void MainWindow:: plotInit(void)
     axisRectGradient.setColorAt(0, QColor(80, 80, 80));
     axisRectGradient.setColorAt(1, QColor(30, 30, 30));
     ui->customPlot->axisRect()->setBackground(axisRectGradient);
-
+*/
 }
 
 void MainWindow:: plotRefresh(void){
 
+    /*
     // prepare data for bar chart
     QVector<QString> AllCustomers;
     QVector<double> InvoiceTotal;
@@ -600,6 +649,8 @@ void MainWindow:: plotRefresh(void){
 
     // add data:
     ui->customPlot->graph(0)->setData(ticks2, MonthSums);
+
+    */
 }
 
 void MainWindow:: goToInvoice(int invoiceID)
@@ -2555,8 +2606,8 @@ float MainWindow::getMonthSum(int record)
 
 void MainWindow::on_refreshPlot_clicked()
 {
-    plotRefresh();
-    ui->customPlot->replot();
+    //plotRefresh();
+    //ui->customPlot->replot();
 }
 
 void MainWindow::on_openInvoiceview_clicked()

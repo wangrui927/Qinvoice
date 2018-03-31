@@ -24,7 +24,7 @@
     <normaloff>:/icons/dependencies/icon/Program_icon.png</normaloff>:/icons/dependencies/icon/Program_icon.png</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout_19">
+   <layout class="QHBoxLayout" name="horizontalLayout_12">
     <item>
      <widget class="QTabWidget" name="InvoiveView">
       <property name="font">
@@ -33,7 +33,7 @@
        </font>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>3</number>
       </property>
       <widget class="QWidget" name="CustomerTab">
        <attribute name="title">
@@ -1980,7 +1980,7 @@
            </spacer>
           </item>
           <item>
-           <widget class="QCustomPlot" name="customPlot" native="true"/>
+           <layout class="QGridLayout" name="PlotgridLayout"/>
           </item>
          </layout>
         </item>
@@ -1997,7 +1997,7 @@
      <x>0</x>
      <y>0</y>
      <width>898</width>
-     <height>22</height>
+     <height>23</height>
     </rect>
    </property>
    <property name="minimumSize">
@@ -2018,8 +2018,8 @@
      <rect>
       <x>312</x>
       <y>107</y>
-      <width>195</width>
-      <height>129</height>
+      <width>164</width>
+      <height>134</height>
      </rect>
     </property>
     <property name="title">
@@ -2092,14 +2092,6 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <customwidgets>
-  <customwidget>
-   <class>QCustomPlot</class>
-   <extends>QWidget</extends>
-   <header>qcustomplot.h</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
  <resources>
   <include location="invoiceressources.qrc"/>
  </resources>
