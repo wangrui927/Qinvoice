@@ -8,6 +8,8 @@
 #include "searchdelegate.h"
 #include "qinvoiceutil.h"
 #include "generictableviewdelegate.h"
+#include <QtCharts/QChart>
+
 
 
 namespace Ui {
@@ -20,6 +22,14 @@ class QCPItemText;
 class QtRPT;
 class MyError;
 class Graphic;
+class DrilldownChart;
+
+QT_CHARTS_BEGIN_NAMESPACE
+class QChartView;
+class QPieSeries;
+QT_CHARTS_END_NAMESPACE
+
+QT_CHARTS_USE_NAMESPACE
 
 class MainWindow : public QMainWindow
 {
@@ -31,9 +41,10 @@ public:
     float getSubtotal(int record);
     float getTotal(int record);
     void actualiseAmountField(float subtotal, float total);
-    QVector<int> getInvoiceList(QString record);
-    QVector<QString> getAllCustomer(void);
+    QVector<int> getInvoiceList(int record);
+    QHash<int, QString> getAllCustomerID(void);
     float getMonthSum(int record);
+    float getMonthSumOfCustomer(int customerID, QString monthNr);
     QString UserPassword;
 
 protected:
@@ -80,8 +91,6 @@ private slots:
 
     void on_refreshSearch_clicked();
 
-    void on_refreshPlot_clicked();
-
     void on_openInvoiceview_clicked();
 
     void on_sendInvoice_clicked();
@@ -117,8 +126,6 @@ private slots:
     void on_actionRelease_Notes_triggered();
 
     void on_actionAbout_triggered();
-
-
 
     void on_SendRemider_clicked();
 
@@ -158,6 +165,10 @@ private:
     }invoiceMailStruct_t;
 
     MyError *cErr;
+
+    DrilldownChart *chart;
+    QChartView *chartView;
+
 
     enum {
         SearchTab_invoiceDate = 2,
@@ -243,8 +254,7 @@ private:
     QString getAddress3(int record);
     QString generateReport(int type, int group);
     void InitialiseGraphics(void);
-    void plotInit(void);
-    void plotRefresh(void);
+    void PlotGraphics(DrilldownChart *chart, QChartView *chartView);
     void ApplicationShowInfos(QString text, int time_ms);
     int sendMail(void);
     int sendMailWithParam(QString AttachmentPath);

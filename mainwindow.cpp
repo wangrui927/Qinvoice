@@ -16,9 +16,6 @@
 #include <QtCharts/QPieSeries>
 #include <QtCore/QRandomGenerator>
 
-
-QT_CHARTS_USE_NAMESPACE
-
 MainWindow::MainWindow(QString dbpath, QInvoiceSettingsStruct &XMLSettings, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -320,7 +317,7 @@ void MainWindow::initialiseUI()
     }
 
     InitialiseGraphics();
-    //plotInit();
+    PlotGraphics(chart,chartView);
 }
 
 void MainWindow::actualiseAllViews()
@@ -333,6 +330,88 @@ void MainWindow::actualiseAllViews()
 
 void MainWindow::InitialiseGraphics(void)
 {
+    // plot drilldown-pie-chart
+
+    chart = new DrilldownChart();
+    chartView = new QChartView(chart);
+    ui->PlotgridLayout->addWidget(chartView);
+
+    chart->setTheme(QChart::ChartThemeLight);
+    chart->setAnimationOptions(QChart::AllAnimations);
+    chart->legend()->setVisible(true);
+    chart->legend()->setAlignment(Qt::AlignRight);
+}
+
+void MainWindow::PlotGraphics(DrilldownChart *chart, QChartView *chartView)
+{
+    QHash<int, QString> AllCustomers; //all CustomerIDs and CompanyNames
+    QVector<QPair<float, QString>> CImapName; //top 10 InvoiceSum and CompanyName
+    QVector<QPair<float, int>> CImapID; //top 10 InvoiceSum and CustomerIDs
+    float TempSum = 0;
+    QStringList top10Names;
+    QVector<int> top10IDs;
+    QVector<double> sumData;
+
+    AllCustomers = getAllCustomerID();
+
+    // If there is any customers in table Customers
+    if(AllCustomers.size()>0){
+        for (int i = 0; i <= AllCustomers.size()-1; i++)
+        {
+            QVector<int> InvoiceList;
+            InvoiceList = getInvoiceList(AllCustomers.keys()[i]);
+            //If the customer has already any invoices
+            if(InvoiceList.size()>0){
+                for (int j = 0; j <= InvoiceList.size()-1; j++)
+                {
+                    TempSum += getSubtotal(InvoiceList[j]);
+                }
+                CImapName.push_back(QPair<float, QString>(TempSum, AllCustomers.values()[i]) );
+                CImapID.push_back(QPair<float, int>(TempSum, AllCustomers.keys()[i]) );
+                TempSum = 0;
+            }
+        }
+    }
+
+    qSort(CImapName.begin(), CImapName.end());
+    qSort(CImapID.begin(), CImapID.end());
+    std::reverse(CImapName.begin(), CImapName.end());
+    std::reverse(CImapID.begin(), CImapID.end());
+
+    //find top 10:
+    //if amount of customers with invoices are less than or equal to 10
+    if (CImapName.size() <= 10){
+        for (int i = 0; i <= CImapName.size()-1; i++){
+            top10Names.append(CImapName[i].second);
+            top10IDs.append(CImapID[i].second);
+            sumData.append(CImapName[i].first);
+        }
+    }
+    //if amount of customers with invoices are more than 10
+    else{
+        for (int i = 0; i <= 9; i++){
+            top10Names.append(CImapName[i].second);
+            top10IDs.append(CImapID[i].second);
+            sumData.append(CImapName[i].first);
+        }
+    }
+
+    // prepare data for month pie chart
+    QList<QVector<double>> monthData;
+    const QStringList monthNr = {
+        "01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"
+    };
+
+    for (int i = 0; i <= top10IDs.size()-1; i++) {
+        QVector<double> MonthSums;
+        for (int j = 0; j <= monthNr.size()-1; j++){
+            MonthSums.append(getMonthSumOfCustomer(top10IDs[i], monthNr[j]));
+        }
+        monthData.append(MonthSums);
+    }
+
+/*
+    // plot drilldown-pie-chart
     DrilldownChart *chart = new DrilldownChart();
     QChartView *chartView = new QChartView(chart);
     ui->PlotgridLayout->addWidget(chartView);
@@ -341,27 +420,31 @@ void MainWindow::InitialiseGraphics(void)
     chart->setAnimationOptions(QChart::AllAnimations);
     chart->legend()->setVisible(true);
     chart->legend()->setAlignment(Qt::AlignRight);
+  */
+
     QPieSeries *yearSeries = new QPieSeries(ui->PlotgridLayout);
 
-    yearSeries->setName("Sales by year - All");
+    yearSeries->setName("Sales by year - Top Customers");
 
     const QStringList months = {
         "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
     };
-    const QStringList names = {
-        "Jane", "John", "Axel", "Mary", "Susan", "Bob"
-    };
 
-    for (const QString &name : names) {
+    int count1=0;
+    int count2=0;
+    for (const QString &name : top10Names) {
         QPieSeries *series = new QPieSeries(ui->PlotgridLayout);
         series->setName("Sales by month - " + name);
 
-        for (const QString &month : months)
-            *series << new DrilldownSlice(QRandomGenerator::global()->bounded(1000), month, yearSeries);
-
+        for (const QString &month : months){
+            *series << new DrilldownSlice(monthData[count1][count2], month, yearSeries); //QRandomGenerator::global()->bounded(1000)
+            count2++;
+        }
+        count2=0;
         QObject::connect(series, &QPieSeries::clicked, chart, &DrilldownChart::handleSliceClicked);
 
-        *yearSeries << new DrilldownSlice(series->sum(), name, series);
+        *yearSeries << new DrilldownSlice(sumData[count1], name, series); //series->sum()
+        count1++;
     }
 
     QObject::connect(yearSeries, &QPieSeries::clicked, chart, &DrilldownChart::handleSliceClicked);
@@ -369,288 +452,6 @@ void MainWindow::InitialiseGraphics(void)
     chart->changeSeries(yearSeries);
 
     chartView->setRenderHint(QPainter::Antialiasing);
-}
-
-void MainWindow:: plotInit(void)
-{
-    /*
-    // prepare data for bar chart
-    QVector<QString> AllCustomers;
-    QVector<double> InvoiceTotal;
-    QHash<QString, float> CImap;
-    float TempSum = 0;
-    QVector<double> ticks;
-    QVector<QString> labels;
-    QVector<double> barData;
-
-    ticks << 1 << 2 << 3 << 4 << 5;
-
-    AllCustomers = getAllCustomer();
-
-    for (int i = 1; i <= AllCustomers.size(); i++)
-    {
-        QVector<int> InvoiceList;
-        InvoiceList = getInvoiceList(AllCustomers[i-1]);
-        for (int j = 1; j <= InvoiceList.size(); j++)
-        {
-            TempSum += getSubtotal(InvoiceList[j-1]);
-        }
-        InvoiceTotal.append(TempSum);
-        TempSum = 0;
-        CImap.insert(AllCustomers[i-1], InvoiceTotal[i-1]);
-    }
-
-    qSort(InvoiceTotal);
-    std::reverse(InvoiceTotal.begin(), InvoiceTotal.end());
-
-    if (AllCustomers.size() <= 5){
-        foreach(float value, InvoiceTotal ){
-            labels.append(CImap.key(value));
-            barData.append(value);
-        }
-    }
-    else{
-        for (int i = 1; i <= 5; i++){
-            labels.append(CImap.key(InvoiceTotal[i-1]));
-            barData.append(InvoiceTotal[i-1]);
-        }
-    }
-
-    // prepare data for curve chart
-    QVector<double> MonthSums;
-    QVector<double> ticks2;
-    QVector<QString> labels2;
-    QDate tmpDate;
-
-    ticks2 << 1 << 2 << 3 << 4 << 5 << 6 << 7 << 8 << 9 << 10 << 11 << 12;
-
-    for (int i = 12; i >= 1; i--){
-        MonthSums.append(getMonthSum(i));
-        tmpDate = QDate::currentDate().addMonths(-i);
-        labels2.append(tmpDate.toString("MM.yyyy"));
-    }
-
-    // bar chart
-    fossil = new QCPBars(ui->customPlot->xAxis, ui->customPlot->yAxis2);
-    ui->customPlot->addPlottable(fossil);
-
-    // set names and colors:
-    QPen pen;
-    pen.setWidthF(1.2);
-    fossil->setName("Top 5 Customers");
-    fossil->setWidth(0.4);
-    pen.setColor(QColor(255, 131, 0));
-    fossil->setPen(pen);
-    fossil->setBrush(QColor(255, 131, 0, 50));
-
-    // prepare x axis:
-    ui->customPlot->xAxis->setAutoTicks(false);
-    ui->customPlot->xAxis->setAutoTickLabels(false);
-    ui->customPlot->xAxis->setTickVector(ticks);
-    ui->customPlot->xAxis->setTickVectorLabels(labels);
-    ui->customPlot->xAxis->setSubTickCount(0);
-    ui->customPlot->xAxis->setTickLength(0, 4);
-    ui->customPlot->xAxis->setRange(0, 6);
-    ui->customPlot->xAxis->setBasePen(QPen(Qt::white, 1));
-    ui->customPlot->xAxis->setTickPen(QPen(Qt::white, 1));
-    ui->customPlot->xAxis->setTickLabelColor(Qt::white);
-
-    // prepare y2 axis:
-    ui->customPlot->yAxis2->setVisible(true);
-    ui->customPlot->yAxis2->setRange(0, barData[0]+100);
-    ui->customPlot->yAxis2->setTicks(false);
-    ui->customPlot->yAxis2->setTickLabels(false);
-    ui->customPlot->yAxis2->setBasePen(QPen(Qt::white, 1));
-    ui->customPlot->yAxis2->setTickPen(QPen(Qt::white, 1));
-    ui->customPlot->yAxis2->setTickLabelColor(Qt::white);
-
-    // add data:
-    fossil->setData(ticks, barData);
-
-    // set text item showed in bars
-    for(int i = 1; i <= barData.size(); i++){
-        textLabel = new QCPItemText(ui->customPlot);
-        ui->customPlot->addItem(textLabel);
-        textLabel->setClipToAxisRect(false);
-        textLabel->position->setAxes(ui->customPlot->xAxis,ui->customPlot->yAxis2);
-        textLabel->position->setType(QCPItemPosition::ptPlotCoords);
-        textLabel->position->setCoords(ticks[i-1],(barData[i-1]/2));
-        //Customizing the item
-        textLabel->setText(QString::number(barData[i-1]));
-        textLabel->setColor(QColor(255, 131, 0));
-        textLabel->setPen(QPen(Qt::NoPen));
-    }
-
-    // curve chart
-    ui->customPlot->addGraph(ui->customPlot->xAxis2, ui->customPlot->yAxis);
-
-    // set color and style
-    QPen CurvePen;
-    CurvePen.setColor(QColor(120, 120, 120));
-    CurvePen.setWidthF(3);
-    ui->customPlot->graph(0)->setPen(CurvePen);
-    ui->customPlot->graph(0)->setName("Monthly Sum");
-    ui->customPlot->graph(0)->setLineStyle(QCPGraph::lsLine);
-    ui->customPlot->graph(0)->setScatterStyle(QCPScatterStyle(QCPScatterStyle::ssCircle, QPen(Qt::black, 1.5), QBrush(Qt::white), 9));
-
-    // prepare x2 axis:
-    ui->customPlot->xAxis2->setRange(0, 13);
-    ui->customPlot->xAxis2->setVisible(true);
-    ui->customPlot->xAxis2->setAutoTicks(false);
-    ui->customPlot->xAxis2->setAutoTickLabels(false);
-    ui->customPlot->xAxis2->setTickVector(ticks2);
-    ui->customPlot->xAxis2->setTickVectorLabels(labels2);
-    ui->customPlot->xAxis2->setSubTickCount(0);
-    ui->customPlot->xAxis2->setBasePen(QPen(Qt::white, 1));
-    ui->customPlot->xAxis2->setTickPen(QPen(Qt::white, 1));
-    ui->customPlot->xAxis2->setTickLabelColor(Qt::white);
-
-    // prepare y axis:
-    QVector<double> axisData = MonthSums;
-    qSort(axisData);
-    ui->customPlot->yAxis->setRange(0, axisData[axisData.size()-1]+100);
-    ui->customPlot->yAxis->setPadding(5); // a bit more space to the left border
-    ui->customPlot->yAxis->setLabel("Chiffre d'affaires (en €)");
-    ui->customPlot->yAxis->setBasePen(QPen(Qt::white, 1));
-    ui->customPlot->yAxis->setTickPen(QPen(Qt::white, 1));
-    ui->customPlot->yAxis->setTickLabelColor(Qt::white);
-    ui->customPlot->yAxis->setLabelColor(Qt::white);
-    ui->customPlot->yAxis->setSubTickPen(QPen(Qt::white, 1));
-
-    // set grid
-    ui->customPlot->xAxis->grid()->setVisible(false);
-    ui->customPlot->xAxis2->grid()->setVisible(true);
-    ui->customPlot->yAxis->grid()->setSubGridVisible(true);
-    ui->customPlot->xAxis2->grid()->setPen(QPen(QColor(140, 140, 140), 1, Qt::DotLine));
-    ui->customPlot->yAxis->grid()->setPen(QPen(QColor(140, 140, 140), 1, Qt::DotLine));
-    ui->customPlot->yAxis->grid()->setSubGridPen(QPen(QColor(80, 80, 80), 1, Qt::DotLine));
-
-    // add data:
-    ui->customPlot->graph(0)->setData(ticks2, MonthSums);
-
-    // add legend:
-    ui->customPlot->legend->setVisible(true);
-    ui->customPlot->axisRect()->insetLayout()->setInsetAlignment(0, Qt::AlignTop|Qt::AlignHCenter);
-    ui->customPlot->legend->setBrush(QColor(220, 220, 220, 220));
-    QPen legendPen;
-    legendPen.setColor(QColor(130, 130, 130, 200));
-    ui->customPlot->legend->setBorderPen(legendPen);
-    QFont legendFont = font();
-    legendFont.setPointSize(10);
-    ui->customPlot->legend->setFont(legendFont);
-    ui->customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom);
-
-    QLinearGradient plotGradient;
-    plotGradient.setStart(0, 0);
-    plotGradient.setFinalStop(0, 350);
-    plotGradient.setColorAt(0, QColor(80, 80, 80));
-    plotGradient.setColorAt(1, QColor(50, 50, 50));
-    ui->customPlot->setBackground(plotGradient);
-    QLinearGradient axisRectGradient;
-    axisRectGradient.setStart(0, 0);
-    axisRectGradient.setFinalStop(0, 350);
-    axisRectGradient.setColorAt(0, QColor(80, 80, 80));
-    axisRectGradient.setColorAt(1, QColor(30, 30, 30));
-    ui->customPlot->axisRect()->setBackground(axisRectGradient);
-*/
-}
-
-void MainWindow:: plotRefresh(void){
-
-    /*
-    // prepare data for bar chart
-    QVector<QString> AllCustomers;
-    QVector<double> InvoiceTotal;
-    QHash<QString, float> CImap;
-    float TempSum = 0;
-    QVector<double> ticks;
-    QVector<QString> labels;
-    QVector<double> barData;
-
-    ticks << 1 << 2 << 3 << 4 << 5;
-
-    AllCustomers = getAllCustomer();
-
-    for (int i = 1; i <= AllCustomers.size(); i++)
-    {
-        QVector<int> InvoiceList;
-        InvoiceList = getInvoiceList(AllCustomers[i-1]);
-        for (int j = 1; j <= InvoiceList.size(); j++)
-        {
-            TempSum += getSubtotal(InvoiceList[j-1]);
-        }
-        InvoiceTotal.append(TempSum);
-        TempSum = 0;
-        CImap.insert(AllCustomers[i-1], InvoiceTotal[i-1]);
-    }
-
-    qSort(InvoiceTotal);
-    std::reverse(InvoiceTotal.begin(), InvoiceTotal.end());
-
-    if (AllCustomers.size() <= 5){
-        foreach(float value, InvoiceTotal ){
-            labels.append(CImap.key(value));
-            barData.append(value);
-        }
-    }
-    else{
-        for (int i = 1; i <= 5; i++){
-            labels.append(CImap.key(InvoiceTotal[i-1]));
-            barData.append(InvoiceTotal[i-1]);
-        }
-    }
-
-    // prepare data for curve chart
-    QVector<double> MonthSums;
-    QVector<double> ticks2;
-    QVector<QString> labels2;
-    QDate tmpDate;
-
-    ticks2 << 1 << 2 << 3 << 4 << 5 << 6 << 7 << 8 << 9 << 10 << 11 << 12;
-
-    for (int i = 12; i >= 1; i--){
-        MonthSums.append(getMonthSum(i));
-        tmpDate = QDate::currentDate().addMonths(-i);
-        labels2.append(tmpDate.toString("MM.yyyy"));
-    }
-
-    // prepare x axis:
-    ui->customPlot->xAxis->setTickVectorLabels(labels);
-
-    // prepare y2 axis:
-    ui->customPlot->yAxis2->setRange(0, barData[0]+100);
-
-    // add data:
-    fossil->setData(ticks, barData);
-
-    // set text item showed in bar
-    ui->customPlot->clearItems();
-    for(int i = 1; i <= barData.size(); i++){
-        textLabel = new QCPItemText(ui->customPlot);
-        ui->customPlot->addItem(textLabel);
-        textLabel->setClipToAxisRect(false);
-        textLabel->position->setAxes(ui->customPlot->xAxis,ui->customPlot->yAxis2);
-        textLabel->position->setType(QCPItemPosition::ptPlotCoords);
-        textLabel->position->setCoords(ticks[i-1],(barData[i-1]/2));
-        //Customizing the item
-        textLabel->setText(QString::number(barData[i-1]));
-        textLabel->setColor(QColor(255, 131, 0));
-        textLabel->setPen(QPen(Qt::NoPen));
-    }
-
-    // curve chart
-    // prepare x2 axis:
-    ui->customPlot->xAxis2->setTickVectorLabels(labels2);
-
-    // prepare y axis:
-    QVector<double> axisData = MonthSums;
-    qSort(axisData);
-    ui->customPlot->yAxis->setRange(0, axisData[axisData.size()-1]+100);
-
-    // add data:
-    ui->customPlot->graph(0)->setData(ticks2, MonthSums);
-
-    */
 }
 
 void MainWindow:: goToInvoice(int invoiceID)
@@ -2559,27 +2360,27 @@ void MainWindow::on_refreshSearch_clicked()
 
 }
 
-QVector<int> MainWindow::getInvoiceList(QString record)
+QVector<int> MainWindow::getInvoiceList(int record)
 {
     QSqlQuery query;
     QVector<int> total;
     query.exec(QString("SELECT InvoiceID FROM Invoices"
                        " INNER JOIN Customers ON Invoices.CustomerID=Customers.CustomerID"
-                       " WHERE CompanyName='%1'").arg(record));
+                       " WHERE Customers.CustomerID='%1'").arg(record));
     while (query.next()) {
         total.append(query.value(0).toInt());
     }
     return total;
 }
 
-QVector<QString> MainWindow::getAllCustomer(void)
+QHash<int, QString> MainWindow::getAllCustomerID(void)
 {
     QSqlQuery query;
-    QVector<QString> total;
-    query.exec(QString("SELECT DISTINCT CompanyName FROM Customers"
+    QHash<int, QString> total;
+    query.exec(QString("SELECT DISTINCT Customers.CustomerID, CompanyName FROM Customers"
                        " INNER JOIN Invoices on Customers.CustomerID=Invoices.CustomerID"));
     while (query.next()) {
-        total.append(query.value(0).toString());
+        total.insert(query.value(0).toInt(), query.value(1).toString());
     }
     return total;
 }
@@ -2604,10 +2405,23 @@ float MainWindow::getMonthSum(int record)
     return returnValue;
 }
 
-void MainWindow::on_refreshPlot_clicked()
+float MainWindow::getMonthSumOfCustomer(int customerID, QString monthNr)
 {
-    //plotRefresh();
-    //ui->customPlot->replot();
+    QSqlQuery query;
+    QVector<int> invList;
+    float returnValue = 0;
+    query.exec(QString("SELECT InvoiceID FROM Invoices"
+                       " WHERE strftime('%m', InvoiceDate) = '%1'"
+                       " AND CustomerID='%2'").arg(monthNr).arg(customerID));
+    while (query.next()) {
+        invList.append(query.value(0).toInt());
+    }
+
+    foreach (int tmp, invList)
+    {
+        returnValue += getSubtotal(tmp);
+    }
+    return returnValue;
 }
 
 void MainWindow::on_openInvoiceview_clicked()
@@ -2884,7 +2698,7 @@ void MainWindow::on_InvoiveView_tabBarClicked(int index)
     }
     else if(index == 3)
     {
-        on_refreshPlot_clicked();
+        PlotGraphics(chart,chartView);
     }
     else {}
 }
@@ -2967,7 +2781,6 @@ void MainWindow::resetALL(void)
     CoursesModel->select();
     ConstatModel->select();
     SearchInvoiceModel->select();
-    on_refreshPlot_clicked();
     CustomerModel->select();
     mapper->toLast();
 }
